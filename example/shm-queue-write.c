@@ -1,0 +1,32 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <unistd.h>
+#include "shm-queue.h"
+#include "shm-cache-mmap.h"
+
+#define SHM_SIZE sizeof(shared_queue_t)
+
+int main() 
+{
+    shm_ptr sp = shm_mmap_init(SHM_NAME, SHM_SIZE, WRITE);
+    if (sp == NULL)
+        return -1;
+
+    shared_queue_t * queue = (shared_queue_t *)sp->shm_addr;
+    
+    queue_init(queue);
+
+    // 生产者向队列中添加数据
+    for (int i = 0; i < 20; ++i) {
+        LOG("Producing: %d", i);
+        queue_enqueue(queue, i);
+        sleep(1);
+    }
+    
+    shm_mmap_unint(sp);
+    
+    return 0;
+}
+
