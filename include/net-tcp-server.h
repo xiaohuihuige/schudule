@@ -5,16 +5,14 @@
 #include "net-buffer.h"
 
 typedef int (*recv_func)(void *user);
-typedef void *(*init_func)(SOCKET fd, buffer_ptr buffer, sche_ptr scher);
+typedef void *(*init_func)(SOCKET fd, buffer_ptr buffer, sche_ptr scher, void *gop);
 typedef int (*deinit_func)(void *user);
-typedef int (*stream_func)(void *user, uint8_t *data, int size, int type);
 
 typedef struct 
 {
     void *user;
     init_func   session_init;
     deinit_func session_deinit;
-    stream_func session_stream;
     recv_func recvf;
 } tcp_session, *session_ptr;
 
