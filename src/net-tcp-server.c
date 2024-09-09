@@ -73,8 +73,8 @@ void tcp_push_stream_connection(server_ptr server, uint8_t *data, int size , int
         if (conn == NULL)
             continue;
 
-        if (conn->session->session_stream)
-            conn->session->session_stream(conn->session->user, data, size, type);
+        // if (conn->session->session_stream)
+        //     conn->session->session_stream(conn->session->user, data, size, type);
     }
 }
 
@@ -151,7 +151,7 @@ int tcp_new_connection(int fd, void *args)
 }
 
 server_ptr tcp_start_server(const char *ip, int port, 
-        init_func session_init, deinit_func session_deinit, stream_func session_stream, recv_func recvf)
+        init_func session_init, deinit_func session_deinit,recv_func recvf, void *gop)
 {
     if (ip == NULL)
         return NULL;
@@ -169,9 +169,9 @@ server_ptr tcp_start_server(const char *ip, int port,
 
     server->session->session_init   = session_init;
     server->session->session_deinit = session_deinit;
-    server->session->session_stream = session_stream;
     server->session->recvf = recvf;
-
+    server->gop = gop;
+    
     server->connect_list = net_task_list_init();
     if (server->connect_list == NULL)
     {
