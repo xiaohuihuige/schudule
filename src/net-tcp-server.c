@@ -128,7 +128,7 @@ int tcp_new_connection(int fd, void *args)
     conn->server = (void *)server;
     conn->session = server->session;
     if (conn->session && conn->session->session_init)
-        conn->session->user = conn->session->session_init(conn->tcp_sockfd, conn->buffer, server->scher);
+        conn->session->user = conn->session->session_init(conn->tcp_sockfd, conn->buffer, server->scher, server->gop);
 
     SetNonBlock(conn->tcp_sockfd);
     SetSendBufSize(conn->tcp_sockfd, 100 * 1024);
