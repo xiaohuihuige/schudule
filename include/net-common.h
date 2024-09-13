@@ -3,7 +3,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif 
 
 #define NET_SUCCESS 0
 #define NET_FAIL    (-1)

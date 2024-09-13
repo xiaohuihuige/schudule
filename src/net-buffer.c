@@ -1,6 +1,6 @@
 #include "net-buffer.h"
 
-static const uint32_t MAX_BYTES_PER_READ = 4096;
+static const uint32_t MAX_BYTES_PER_READ = 4096 * 512;
 static const uint32_t MAX_BUFFER_SIZE = 1024 * 100000;
 const uint8_t kCRLF[] = "\r\n";
 

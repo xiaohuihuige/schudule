@@ -61,6 +61,21 @@ int bs_write_bytes(bs_t* b, uint8_t* buf, int len);
 int bs_skip_bytes(bs_t* b, int len);
 uint32_t bs_next_bits(bs_t* b, int nbits);
 
+static inline void bs_skip_u1(bs_t* b)
+{    
+    b->bits_left--;
+    if (b->bits_left == 0) { b->p ++; b->bits_left = 8; }
+}
+
+static inline void bs_skip_u(bs_t* b, int n)
+{
+    int i;
+    for ( i = 0; i < n; i++ ) 
+    {
+        bs_skip_u1( b );
+    }
+}
+
 #ifdef __cplusplus
 }
 #endif

@@ -6,7 +6,7 @@
 
 #define SHECH_RUNNING   1
 #define SHECH_STOP      0
-#define SHECH_DEBUG     1
+#define SHECH_DEBUG     0
 
 #define SDBG(fmt, args...) \
     if (SHECH_DEBUG)       \
