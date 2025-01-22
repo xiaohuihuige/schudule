@@ -20,7 +20,7 @@ LOG_DEMO        = $(EXAMPLE_PATH)/log-demo
 LIB_S_SCHUDULE  = libschudule.a
 LIB_SCHUDULE    = libschudule.so
 
-CFLAGS   	= -lpthread -O0  -DOS_LINUX -g -lm
+CFLAGS   	= -lpthread -O0  -DOS_LINUX -g -lm -lrt
 LIBS     	= -I./include
 
 SOURCE_C 	= $(wildcard $(PROJECT_PATH)/src/*.c)
