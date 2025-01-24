@@ -2,26 +2,27 @@
 PROJECT_PATH 	= $(shell pwd)
 OBJ_PATH 	    = $(PROJECT_PATH)/obj
 EXAMPLE_PATH    = $(PROJECT_PATH)/example
+BIN_PATH        = $(PROJECT_PATH)/bin
 
-TCP_SERVER      = $(EXAMPLE_PATH)/tcp-server
-TCP_CLIENT      = $(EXAMPLE_PATH)/tcp-client
-KERNEL_LIST     = $(EXAMPLE_PATH)/kernel-list
-CJSON           = $(EXAMPLE_PATH)/cJSON-test
-NET_TRIGGER     = $(EXAMPLE_PATH)/net-trigger
-NET_TIMER       = $(EXAMPLE_PATH)/net-timer
-RING_BUFFER     = $(EXAMPLE_PATH)/ring-buffer
-SHM_CACHE       = $(EXAMPLE_PATH)/shm-cache-demo
-SHM_CACHE_WRITE = $(EXAMPLE_PATH)/shm-cache-write
-SHM_CACHE_READER= $(EXAMPLE_PATH)/shm-cache-reader
-SHM_QUEUE_WRITE = $(EXAMPLE_PATH)/shm-queue-write
-SHM_QUEUE_READER= $(EXAMPLE_PATH)/shm-queue-reader
-LOG_DEMO        = $(EXAMPLE_PATH)/log-demo
+TCP_SERVER      = $(BIN_PATH)/tcp-server
+TCP_CLIENT      = $(BIN_PATH)/tcp-client
+KERNEL_LIST     = $(BIN_PATH)/kernel-list
+CJSON           = $(BIN_PATH)/cJSON-test
+NET_TRIGGER     = $(BIN_PATH)/net-trigger
+NET_TIMER       = $(BIN_PATH)/net-timer
+RING_BUFFER     = $(BIN_PATH)/ring-buffer
+SHM_CACHE       = $(BIN_PATH)/shm-cache-demo
+SHM_CACHE_WRITE = $(BIN_PATH)/shm-cache-write
+SHM_CACHE_READER= $(BIN_PATH)/shm-cache-reader
+SHM_QUEUE_WRITE = $(BIN_PATH)/shm-queue-write
+SHM_QUEUE_READER= $(BIN_PATH)/shm-queue-reader
+LOG_DEMO        = $(BIN_PATH)/log-demo
 
 LIB_S_SCHUDULE  = libschudule.a
 LIB_SCHUDULE    = libschudule.so
 
 CFLAGS   	= -lpthread -O0  -DOS_LINUX -g -lm -lrt
-LIBS     	= -I./include
+LIBS     	= -I./src
 
 SOURCE_C 	= $(wildcard $(PROJECT_PATH)/src/*.c)
 SOURCE_O 	= $(patsubst %.c, $(OBJ_PATH)/%.o, $(notdir $(SOURCE_C)))
@@ -33,7 +34,10 @@ EXAMPLE_O 	= $(patsubst %.c, $(OBJ_PATH)/%.o, $(notdir $(EXAMPLE_C)))
 
 all: clean obj $(LIB_S_SCHUDULE) $(LIB_SCHUDULE) example install
 
-example: $(TCP_CLIENT) $(TCP_SERVER) $(KERNEL_LIST) $(CJSON) $(NET_TRIGGER) $(NET_TIMER) $(RING_BUFFER) $(LOG_DEMO) $(SHM_CACHE) $(SHM_CACHE_WRITE) $(SHM_CACHE_READER) $(SHM_QUEUE_WRITE) $(SHM_QUEUE_READER) 
+example: $(TCP_CLIENT) $(TCP_SERVER) $(KERNEL_LIST)          \
+		 $(CJSON) $(NET_TRIGGER) $(NET_TIMER) $(RING_BUFFER) \
+	     $(LOG_DEMO) $(SHM_CACHE) $(SHM_CACHE_WRITE)         \
+		 $(SHM_CACHE_READER) $(SHM_QUEUE_WRITE) $(SHM_QUEUE_READER) 
 
 #########################################################################
 $(SHM_QUEUE_WRITE): $(OBJ_PATH)/shm-queue-write.o $(SOURCE_O)
@@ -131,14 +135,22 @@ ifeq ("$(wildcard $(OBJ_PATH))","")
 	mkdir $(OBJ_PATH)
 endif
 
+ifeq ("$(wildcard $(BIN_PATH))","")
+	mkdir $(BIN_PATH)
+endif
+
+
 clean:
 	-$(RM) -r $(OBJ_PATH)/*.o 
 	-$(RM) -r __install
 	-$(RM) -r $(TCP_CLIENT) $(TCP_SERVER) $(KERNEL_LIST) $(CJSON) $(SHM_CACHE)
-	-$(RM) -r $(LOG_DEMO)  $(NET_TRIGGER) $(NET_TIMER) $(RING_BUFFER) $(SHM_CACHE_WRITE) $(SHM_CACHE_READER) $(SHM_QUEUE_WRITE) $(SHM_QUEUE_READER)      
+	-$(RM) -r $(LOG_DEMO)  $(NET_TRIGGER) \
+			  $(NET_TIMER) $(RING_BUFFER) \
+			  $(SHM_CACHE_WRITE) $(SHM_CACHE_READER) \
+			  $(SHM_QUEUE_WRITE) $(SHM_QUEUE_READER)      
 
 install:
 	mkdir __install && mkdir -p  __install/lib
 	mv $(LIB_SCHUDULE) __install/lib
 	mv $(LIB_S_SCHUDULE)  __install/lib
-	cp -r include __install
+	cp -r ./src/*.h __install
