@@ -164,6 +164,8 @@ static int _log_print(int lvl, const char *tag,
     writev(g_log_info.log_fd, vec, i+1);
     
     pthread_mutex_unlock(&g_log_info.lock);
+
+    return 0;
 }
 
 int log_print(int lvl, const char *tag, const char *file, int line,

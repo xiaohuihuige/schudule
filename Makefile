@@ -1,156 +1,49 @@
+CURRENT_DIR = $(shell pwd)
+OUT_DIR     = $(CURRENT_DIR)/out
+OBJ_DIR     = $(OUT_DIR)/obj
+IPCS_DIR    = $(CURRENT_DIR)/src/ipcs
+NET_DIR     = $(CURRENT_DIR)/src/net
+UTIL_DIR    = $(CURRENT_DIR)/src/util
+BIN_DIR     = $(OUT_DIR)/bin
+SRC_DIR     = $(CURRENT_DIR)/src
 
-PROJECT_PATH 	= $(shell pwd)
-OBJ_PATH 	    = $(PROJECT_PATH)/obj
-EXAMPLE_PATH    = $(PROJECT_PATH)/example
-BIN_PATH        = $(PROJECT_PATH)/bin
+STATIC_NAME  = $(OUT_DIR)/libmylib.a
+DYNAMIC_NAME = $(OUT_DIR)/libmylib.so
 
-TCP_SERVER      = $(BIN_PATH)/tcp-server
-TCP_CLIENT      = $(BIN_PATH)/tcp-client
-KERNEL_LIST     = $(BIN_PATH)/kernel-list
-CJSON           = $(BIN_PATH)/cJSON-test
-NET_TRIGGER     = $(BIN_PATH)/net-trigger
-NET_TIMER       = $(BIN_PATH)/net-timer
-RING_BUFFER     = $(BIN_PATH)/ring-buffer
-SHM_CACHE       = $(BIN_PATH)/shm-cache-demo
-SHM_CACHE_WRITE = $(BIN_PATH)/shm-cache-write
-SHM_CACHE_READER= $(BIN_PATH)/shm-cache-reader
-SHM_QUEUE_WRITE = $(BIN_PATH)/shm-queue-write
-SHM_QUEUE_READER= $(BIN_PATH)/shm-queue-reader
-LOG_DEMO        = $(BIN_PATH)/log-demo
+OBJ_FILE = $(wildcard $(OBJ_DIR)/*.o)
 
-LIB_S_SCHUDULE  = libschudule.a
-LIB_SCHUDULE    = libschudule.so
+EXECUTABLES = $(patsubst example/%.c, $(BIN_DIR)/%, $(wildcard example/*.c))
 
-CFLAGS   	= -lpthread -O0  -DOS_LINUX -g -lm -lrt
-LIBS     	= -I./src
+CFLAGS = -I$(IPCS_DIR) -I$(NET_DIR) -I$(UTIL_DIR)  -lpthread -lrt -Wall -fPIC
 
-SOURCE_C 	= $(wildcard $(PROJECT_PATH)/src/*.c)
-SOURCE_O 	= $(patsubst %.c, $(OBJ_PATH)/%.o, $(notdir $(SOURCE_C)))
+.PHONY: all clean subdir TEMP_PATH
 
-EXAMPLE_C   = $(wildcard $(EXAMPLE_PATH)/*.c)
-EXAMPLE_O 	= $(patsubst %.c, $(OBJ_PATH)/%.o, $(notdir $(EXAMPLE_C)))
+all: TEMP_PATH subdir $(EXECUTABLES)
 
-.PHONY: clean install obj
-
-all: clean obj $(LIB_S_SCHUDULE) $(LIB_SCHUDULE) example install
-
-example: $(TCP_CLIENT) $(TCP_SERVER) $(KERNEL_LIST)          \
-		 $(CJSON) $(NET_TRIGGER) $(NET_TIMER) $(RING_BUFFER) \
-	     $(LOG_DEMO) $(SHM_CACHE) $(SHM_CACHE_WRITE)         \
-		 $(SHM_CACHE_READER) $(SHM_QUEUE_WRITE) $(SHM_QUEUE_READER) 
-
-#########################################################################
-$(SHM_QUEUE_WRITE): $(OBJ_PATH)/shm-queue-write.o $(SOURCE_O)
-	$(CC) $^ -o $@ $(CFLAGS) $(LIBS)
-
-$(SHM_QUEUE_READER): $(OBJ_PATH)/shm-queue-reader.o $(SOURCE_O)
-	$(CC) $^ -o $@ $(CFLAGS) $(LIBS)
-
-$(SHM_CACHE_WRITE): $(OBJ_PATH)/shm-cache-write.o $(SOURCE_O)
-	$(CC) $^ -o $@ $(CFLAGS) $(LIBS) 
-
-$(SHM_CACHE_READER): $(OBJ_PATH)/shm-cache-reader.o $(SOURCE_O)
-	$(CC) $^ -o $@ $(CFLAGS) $(LIBS) 
-
-$(SHM_CACHE): $(OBJ_PATH)/shm-cache-demo.o $(SOURCE_O)
-	$(CC) $^ -o $@ $(CFLAGS) $(LIBS) 
-	
-$(LOG_DEMO): $(OBJ_PATH)/log-demo.o $(SOURCE_O)
-	$(CC) $^ -o $@ $(CFLAGS) $(LIBS) 
-
-$(RING_BUFFER): $(OBJ_PATH)/ringbuffer-demo.o $(SOURCE_O)
-	$(CC) $^ -o $@ $(CFLAGS) $(LIBS) 
-
-$(NET_TIMER): $(OBJ_PATH)/net-timer.o $(SOURCE_O)
-	$(CC) $^ -o $@ $(CFLAGS) $(LIBS) 
-
-$(NET_TRIGGER): $(OBJ_PATH)/net-trigger.o $(SOURCE_O)
-	$(CC) $^ -o $@ $(CFLAGS) $(LIBS) 
-
-$(KERNEL_LIST): $(OBJ_PATH)/kernel-list.o $(SOURCE_O)
-	$(CC) $^ -o $@ $(CFLAGS) $(LIBS) 
-
-$(TCP_SERVER): $(OBJ_PATH)/tcp-server.o $(SOURCE_O)
-	$(CC) $^ -o $@ $(CFLAGS) $(LIBS) 
-
-$(TCP_CLIENT): $(OBJ_PATH)/tcp-client.o $(SOURCE_O)
-	$(CC) $^ -o $@ $(CFLAGS) $(LIBS) 
-
-$(CJSON): $(OBJ_PATH)/cJSON-test.o $(SOURCE_O)
-	$(CC) $^ -o $@ $(CFLAGS) $(LIBS) 
-
-#########################################################################
-$(OBJ_PATH)/shm-queue-reader.o: $(EXAMPLE_PATH)/shm-queue-reader.c
-	$(CC) -c $^ -o $@ $(CFLAGS) $(LIBS)
-
-$(OBJ_PATH)/shm-queue-write.o: $(EXAMPLE_PATH)/shm-queue-write.c
-	$(CC) -c $^ -o $@ $(CFLAGS) $(LIBS)
-
-$(OBJ_PATH)/shm-cache-write.o: $(EXAMPLE_PATH)/shm-cache-write.c
-	$(CC) -c $^ -o $@ $(CFLAGS) $(LIBS)
-
-$(OBJ_PATH)/shm-cache-reader.o: $(EXAMPLE_PATH)/shm-cache-reader.c
-	$(CC) -c $^ -o $@ $(CFLAGS) $(LIBS)
-
-$(OBJ_PATH)/shm-cache-demo.o: $(EXAMPLE_PATH)/shm-cache-demo.c
-	$(CC) -c $^ -o $@ $(CFLAGS) $(LIBS)
-
-$(OBJ_PATH)/log-demo.o: $(EXAMPLE_PATH)/log-demo.c
-	$(CC) -c $^ -o $@ $(CFLAGS) $(LIBS)
-
-$(OBJ_PATH)/ringbuffer-demo.o: $(EXAMPLE_PATH)/ringbuffer-demo.c 
-	$(CC) -c $^ -o $@ $(CFLAGS) $(LIBS)
-
-$(OBJ_PATH)/net-timer.o: $(EXAMPLE_PATH)/net-timer.c 
-	$(CC) -c $^ -o $@ $(CFLAGS) $(LIBS)
-
-$(OBJ_PATH)/net-trigger.o: $(EXAMPLE_PATH)/net-trigger.c 
-	$(CC) -c $^ -o $@ $(CFLAGS) $(LIBS)
-
-$(OBJ_PATH)/kernel-list.o: $(EXAMPLE_PATH)/kernel-list.c 
-	$(CC) -c $^ -o $@ $(CFLAGS) $(LIBS)
-
-$(OBJ_PATH)/tcp-server.o: $(EXAMPLE_PATH)/tcp-server.c
-	$(CC) -c $^ -o $@ $(CFLAGS) $(LIBS)
-
-$(OBJ_PATH)/tcp-client.o: $(EXAMPLE_PATH)/tcp-client.c 
-	$(CC) -c $^ -o $@ $(CFLAGS) $(LIBS)
-
-$(OBJ_PATH)/cJSON-test.o: $(EXAMPLE_PATH)/cJSON-test.c 
-	$(CC) -c $^ -o $@ $(CFLAGS) $(LIBS)
-
-#########################################################################
-$(LIB_SCHUDULE): $(SOURCE_C)
-	$(CC) -fPIC -shared -o $@ $^ $(LIBS)
-
-$(LIB_S_SCHUDULE): $(SOURCE_O)
-	$(AR) rcs $@ $^
-
-$(OBJ_PATH)/%.o: $(PROJECT_PATH)/src/%.c
-	$(CC) -c $^ -o $@ $(CFLAGS) $(LIBS)
-
-#########################################################################
-obj:
-ifeq ("$(wildcard $(OBJ_PATH))","")
-	mkdir $(OBJ_PATH)
+TEMP_PATH:
+ifeq ("$(wildcard $(OUT_DIR))","")
+	mkdir $(OUT_DIR)
+endif
+ifeq ("$(wildcard $(OBJ_DIR))","")
+	mkdir $(OBJ_DIR)
+endif
+ifeq ("$(wildcard $(BIN_DIR))","")
+	mkdir $(BIN_DIR)
 endif
 
-ifeq ("$(wildcard $(BIN_PATH))","")
-	mkdir $(BIN_PATH)
-endif
 
+$(BIN_DIR)/%: example/%.c | TEMP_PATH
+	$(CC) -o $@ $^ $(OBJ_FILE) $(CFLAGS)
+
+subdir :
+	$(MAKE) -C $(SRC_DIR) CFLAGS="$(CFLAGS)" \
+			OBJ_DIR=$(OBJ_DIR)           \
+			IPCS_DIR=$(IPCS_DIR)         \
+			NET_DIR=$(NET_DIR)           \
+			STATIC_NAME=$(STATIC_NAME)   \
+			UTIL_DIR=$(UTIL_DIR)         \
+			DYNAMIC_NAME=$(DYNAMIC_NAME) \
 
 clean:
-	-$(RM) -r $(OBJ_PATH)/*.o 
-	-$(RM) -r __install
-	-$(RM) -r $(TCP_CLIENT) $(TCP_SERVER) $(KERNEL_LIST) $(CJSON) $(SHM_CACHE)
-	-$(RM) -r $(LOG_DEMO)  $(NET_TRIGGER) \
-			  $(NET_TIMER) $(RING_BUFFER) \
-			  $(SHM_CACHE_WRITE) $(SHM_CACHE_READER) \
-			  $(SHM_QUEUE_WRITE) $(SHM_QUEUE_READER)      
+	-$(RM) -rf $(OUT_DIR) 
 
-install:
-	mkdir __install && mkdir -p  __install/lib
-	mv $(LIB_SCHUDULE) __install/lib
-	mv $(LIB_S_SCHUDULE)  __install/lib
-	cp -r ./src/*.h __install

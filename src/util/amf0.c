@@ -1,6 +1,6 @@
 #include "amf0.h"
 
-static double s_double = 1.0; // 3ff0 0000 0000 0000
+//static double s_double = 1.0; // 3ff0 0000 0000 0000
 
 int amf_write_null(bs_t *b)
 {
