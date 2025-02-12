@@ -35,15 +35,8 @@ endif
 $(BIN_DIR)/%: example/%.c | TEMP_PATH
 	$(CC) -o $@ $^ $(OBJ_FILE) $(CFLAGS)
 
-subdir :
-	$(MAKE) -C $(SRC_DIR) CFLAGS="$(CFLAGS)" \
-			OBJ_DIR=$(OBJ_DIR)           \
-			IPCS_DIR=$(IPCS_DIR)         \
-			NET_DIR=$(NET_DIR)           \
-			STATIC_NAME=$(STATIC_NAME)   \
-			UTIL_DIR=$(UTIL_DIR)         \
-			DYNAMIC_NAME=$(DYNAMIC_NAME) \
-
+subdir:
+	$(MAKE) -C $(SRC_DIR) CFLAGS="$(CFLAGS)" OBJ_DIR=$(OBJ_DIR) IPCS_DIR=$(IPCS_DIR) NET_DIR=$(NET_DIR) STATIC_NAME=$(STATIC_NAME) UTIL_DIR=$(UTIL_DIR) DYNAMIC_NAME=$(DYNAMIC_NAME) 
 clean:
 	-$(RM) -rf $(OUT_DIR) 
 
