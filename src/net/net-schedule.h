@@ -110,6 +110,4 @@ void net_delete_timer_task(timer_ptr timer);
 void net_async_delete_timer_task(timer_ptr timer);
 int net_modify_timer_task(timer_ptr timer, int repeat_ms);
 
-int net_get_result(sche_ptr scher, long long task_id);
-
 #endif // !__SCHULE_H__

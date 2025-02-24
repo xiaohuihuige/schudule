@@ -39,9 +39,9 @@ extern "C" {
 #include <sys/stat.h>
 
 #include "log.h"
-#include "net-bitstream.h"
+#include "bitstream.h"
 #include "kernel-list.h"
-#include "net-timestamp.h"
+#include "timestamp.h"
 #include "cJSON.h"
 #include "net-tcpsocket.h"
 #include "ring-buffer.h"

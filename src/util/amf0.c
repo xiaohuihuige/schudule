@@ -229,7 +229,7 @@ int amf_read_double(bs_t *b, double* value)
     return 8;
 }
 
-int amf_read_string(bs_t *b, uint8_t *string, int size)
+int amf_read_string(bs_t *b, char *string, int size)
 {
     if (bs_bytes_left(b) < 1 || string == NULL)
     {   
@@ -268,7 +268,7 @@ int amf_read_string(bs_t *b, uint8_t *string, int size)
     return str_size;
 }
 
-int amf_read_long_string(bs_t *b, uint8_t *string, int size)
+int amf_read_long_string(bs_t *b, char *string, int size)
 {
     if (bs_bytes_left(b) < 4 || string == NULL)
     {
@@ -369,7 +369,7 @@ int amf_read_object(bs_t *b, amf_object_item* items, size_t n)
 
     while (bs_bytes_left(b) > 2)
     {
-        uint8_t string[64] = {0};
+        char string[64] = {0};
         int str_size = amf_read_string(b, string, sizeof(string));
         
         int i = 0;

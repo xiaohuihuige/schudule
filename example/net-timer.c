@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 
     timer_delete1 = net_add_timer_task(scher, 2000, 2000, function_timer_delete, NULL);
 
-    timer_ptr timer_once = net_add_timer_task(scher, 4000, 0, function_timer_once, NULL);
+    net_add_timer_task(scher, 4000, 0, function_timer_once, NULL);
 
     timer_ptr timer_repeat = net_add_timer_task(scher, 3000, 1000, function_timer_repeat, NULL);
 

@@ -46,8 +46,8 @@ int main()
         return -1;
     }
 
-    timer_ptr timer_push = net_add_timer_task(scher_push, 1000, 200, function_timer_push, (void *)buffer);
-    timer_ptr timer_pull = net_add_timer_task(scher_pull, 3000, 500, function_timer_pull, (void *)buffer);
+    net_add_timer_task(scher_push, 1000, 200, function_timer_push, (void *)buffer);
+    net_add_timer_task(scher_pull, 3000, 500, function_timer_pull, (void *)buffer);
 
     while (1)
     {

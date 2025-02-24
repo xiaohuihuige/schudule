@@ -8,7 +8,7 @@ int function_timer_put(void *args)
     if (args == NULL)
         return -1;
 
-    uint8_t data[256] = {0};
+    char data[256] = {0};
     if ((number % 2) == 1)
     {
         if (number % 3 == 0)
@@ -23,7 +23,7 @@ int function_timer_put(void *args)
         snprintf(data, sizeof(data), "--------wumh---------- time:[%lld]", get_time_ms()); 
     }
     number++;
-    shm_cache_put((shm_cache_ptr)args, data, strlen(data), number);
+    shm_cache_put((shm_cache_ptr)args, (uint8_t *)data, strlen(data), number);
     return 0;
 }
 
@@ -60,9 +60,9 @@ int main()
     }
 
 
-    timer_ptr timer_put = net_add_timer_task(scher_put, 0, 20, function_timer_put, (void *)cache);
+    net_add_timer_task(scher_put, 0, 20, function_timer_put, (void *)cache);
 
-    timer_ptr timer_get = net_add_timer_task(scher_get, 1000, 20, function_timer_get, (void *)cache);
+    net_add_timer_task(scher_get, 1000, 20, function_timer_get, (void *)cache);
 
     while (1)
     {

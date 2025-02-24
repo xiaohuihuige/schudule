@@ -1,4 +1,4 @@
-#include "net-bitstream.h"
+#include "bitstream.h"
 
 bs_t *bs_new(uint8_t *buf, size_t size)
 {
@@ -430,7 +430,7 @@ uint64_t bs_next_bytes(bs_t *bs, int nbytes)
     return val;
 }
 
-int bs_read_string(bs_t *bs, int str_size, uint8_t *string, int size)
+int bs_read_string(bs_t *bs, int str_size, char *string, int size)
 {
     if (bs == NULL || string == NULL || str_size > size -1)
         return -1;

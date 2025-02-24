@@ -47,7 +47,7 @@ uint32_t bs_read_ru1(bs_t *b);
 uint32_t bs_read_u8(bs_t* b);       //读取8个字节
 uint32_t bs_read_ue(bs_t* b);       //UE编码结果
 int32_t  bs_read_se(bs_t* b);       //SE编码结果
-int      bs_read_string(bs_t *bs, int str_size, uint8_t  *string, int size);
+int      bs_read_string(bs_t *bs, int str_size, char  *string, int size);
 
 void bs_write_u1(bs_t* b, uint32_t v);
 void bs_write_u(bs_t* b, int n, uint32_t v);

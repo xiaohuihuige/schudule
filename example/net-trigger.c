@@ -30,13 +30,11 @@ int main()
         net_add_trigger_task(scher, async_function_trigger, NULL, 0);
     }
 
-    long long task_id = net_add_trigger_task(scher, sync_function_trigger, NULL, 1);
+    net_add_trigger_task(scher, sync_function_trigger, NULL, 1);
     int number = 5;
     while (number > 0)
     {
         sleep(1);
-        int result = net_get_result(scher, task_id);
-        ERR("get function result %d", result);
         number--;
     }
     net_destroy_scheduler(scher);

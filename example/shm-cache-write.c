@@ -7,7 +7,7 @@ int main()
     if (sp == NULL)
         return -1;
 
-    shm_mmap_write(sp, "wumighui si handson", sizeof("wumighui si handson"));
+    shm_mmap_write(sp, (uint8_t *)"wumighui si handson", sizeof("wumighui si handson"));
     
     return 0;
 }
