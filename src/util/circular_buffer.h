@@ -14,12 +14,12 @@ typedef struct
     uint32_t in;             // 入口位置
     uint32_t out;            // 出口位置
     pthread_mutex_t lock;    // 互斥锁
-} ring_buffer;
+} CircularBuffer;
 
-ring_buffer *ring_buffer_init(uint32_t size);
-void ring_buffer_free(ring_buffer *ring_buf);
-uint32_t ring_buffer_put(ring_buffer *ring_buf, void *buffer, uint32_t size);
-uint32_t ring_buffer_get(ring_buffer *ring_buf, void *buffer, uint32_t size);
-uint32_t ring_buffer_len(ring_buffer *ring_buf);
+CircularBuffer *createCircularBuffer(uint32_t size);
+void destroyCircularBuffer(CircularBuffer *ring_buf);
+uint32_t writeToCircularBuffer(CircularBuffer *ring_buf, void *buffer, uint32_t size);
+uint32_t readFromCircularBuffer(CircularBuffer *ring_buf, void *buffer, uint32_t size);
+uint32_t getCircularBufferSize(CircularBuffer *ring_buf);
 
 #endif

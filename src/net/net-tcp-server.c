@@ -10,9 +10,6 @@ void tcp_close_connection(connect_ptr conn)
     if (conn->session && conn->session->session_init)
         conn->session->session_deinit(conn->session->user);
 
-    if (conn->buffer)
-        buffer_unint(conn->buffer);
-
     if (conn->ev)
         net_delete_reader(conn->ev);
 
@@ -85,13 +82,18 @@ int tcp_recv_msg(int fd, void *args)
         return NET_FAIL;
 
     server_ptr server = (server_ptr) conn->server;
-    int size = buffer_read(conn->buffer, fd);
+
+    Buffer * buffer = MALLOC(Buffer, sizeof(Buffer) + REVC_MTU);
+
+    int size = Read(fd, buffer->data, REVC_MTU);
     if (size <= 0)
     {
         tcp_close_connection(conn);
         net_task_list_find_del(server->connect_list, tcp_connection_info, conn);
         return NET_FAIL;
     }
+
+    buffer->length = size;
 
     if (conn->session && conn->session->recvf)
         conn->session->recvf(conn->session->user);
@@ -109,18 +111,10 @@ int tcp_new_connection(int fd, void *args)
     if (conn == NULL)
         return NET_FAIL;
 
-    conn->buffer = buffer_init(4096);
-    if (conn->buffer == NULL)
-    {
-        net_free(conn);
-        return NET_FAIL;
-    }
-
     conn->tcp_sockfd = acceptTcpSocket(fd);
     if (conn->tcp_sockfd <= 0)
     {
         ERR("accept error");
-        buffer_unint(conn->buffer);
         net_free(conn);
         return NET_FAIL;
     }
@@ -128,7 +122,7 @@ int tcp_new_connection(int fd, void *args)
     conn->server = (void *)server;
     conn->session = server->session;
     if (conn->session && conn->session->session_init)
-        conn->session->user = conn->session->session_init(conn->tcp_sockfd, conn->buffer, server->scher, server->gop);
+        conn->session->user = conn->session->session_init(conn->tcp_sockfd, server->scher, server->gop);
 
     SetNonBlock(conn->tcp_sockfd);
     SetSendBufSize(conn->tcp_sockfd, 100 * 1024);

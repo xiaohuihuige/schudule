@@ -29,4 +29,7 @@ uint16_t GetPeerPort(SOCKET sockfd);
 int GetPeerAddr(SOCKET sockfd, struct sockaddr_in *addr);
 int Connect(SOCKET sockfd, char *ip, uint16_t port, int timeout);
 
+int Read(SOCKET sockfd, char *data, uint32_t len);
+int Fread(FILE *fp, char *data, uint32_t len);
+
 #endif // !__TCP_SOCKET_H__

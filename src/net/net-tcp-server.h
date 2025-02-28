@@ -2,10 +2,9 @@
 #define __NET_TCP_SERVER_H__
 #include "net-common.h"
 #include "net-schedule.h"
-#include "net-buffer.h"
 
 typedef int (*recv_func)(void *user);
-typedef void *(*init_func)(SOCKET fd, buffer_ptr buffer, sche_ptr scher, void *gop);
+typedef void *(*init_func)(SOCKET fd, sche_ptr scher, void *gop);
 typedef int (*deinit_func)(void *user);
 
 typedef struct 
@@ -22,7 +21,6 @@ typedef struct
     SOCKET tcp_sockfd;
     ev_ptr ev;
     void *server;
-    buffer_ptr buffer;
 } tcp_connection_info, *connect_ptr;
 
 typedef struct

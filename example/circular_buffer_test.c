@@ -14,22 +14,22 @@ int function_timer_push(void *args)
     snprintf(msg.data, sizeof(msg.data), "%s__%d","wmh", number);
     number++;
 
-    ring_buffer_put((ring_buffer *)args, (void *)&msg, sizeof(msg_info));
-    LOG("push ------->>>[%s], [%lu]", msg.data, ring_buffer_len((ring_buffer *)args)/sizeof(msg_info));
+    writeToCircularBuffer((CircularBuffer *)args, (void *)&msg, sizeof(msg_info));
+    LOG("push ------->>>[%s], [%lu]", msg.data, getCircularBufferSize((CircularBuffer *)args)/sizeof(msg_info));
     return 0;
 }
 
 int function_timer_pull(void *args)
 {
     msg_info msg;
-    ring_buffer_get((ring_buffer *)args, (void *)&msg, sizeof(msg_info));
-    LOG("pull <<<------ [%s], [%lu]", msg.data, ring_buffer_len((ring_buffer *)args)/sizeof(msg_info));
+    readFromCircularBuffer((CircularBuffer *)args, (void *)&msg, sizeof(msg_info));
+    LOG("pull <<<------ [%s], [%lu]", msg.data, getCircularBufferSize((CircularBuffer *)args)/sizeof(msg_info));
     return 0;
 }
 
 int main()
 {
-    ring_buffer * buffer = ring_buffer_init(4096 * 2);
+    CircularBuffer * buffer = createCircularBuffer(4096 * 2);
     if (buffer == NULL)
         return -1;
     sche_ptr scher_push = net_create_scheduler();

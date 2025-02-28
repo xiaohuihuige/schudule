@@ -1,10 +1,9 @@
-#include "ring-buffer.h"
+#include "circular_buffer.h"
 
 // 初始化缓冲区
-ring_buffer *ring_buffer_init(uint32_t size)
+CircularBuffer *createCircularBuffer(uint32_t size)
 {
-    if (!is_power_of_2(size))
-    {
+    if (!is_power_of_2(size)) {
         if (size < 2)
             size = 2;
 
@@ -19,16 +18,14 @@ ring_buffer *ring_buffer_init(uint32_t size)
     if (size < 0)
         return NULL;
 
-    ring_buffer *ring_buf = (ring_buffer *)calloc(1, sizeof(ring_buffer));
-    if (!ring_buf)
-    {
+    CircularBuffer *ring_buf = (CircularBuffer *)calloc(1, sizeof(CircularBuffer));
+    if (!ring_buf) {
         ERR("Failed to malloc memory,errno:%u,reason:%s", errno, strerror(errno));
-        return ring_buf;
+        return NULL;
     }
 
     ring_buf->buffer = (void *)malloc(size);
-    if (ring_buf->buffer)
-    {
+    if (ring_buf->buffer) {
         net_free(ring_buf);
         return NULL;
     }
@@ -42,19 +39,18 @@ ring_buffer *ring_buffer_init(uint32_t size)
 }
 
 // 释放缓冲区
-void ring_buffer_free(ring_buffer *ring_buf)
+void destroyCircularBuffer(CircularBuffer *ring_buf)
 {
-    if (ring_buf)
-    {
+    if (ring_buf) {
         net_free(ring_buf->buffer);
         pthread_mutex_destroy(&ring_buf->lock);
         net_free(ring_buf);
     }
 }
 
-uint32_t ring_buffer_len(ring_buffer *ring_buf)
+uint32_t getCircularBufferSize(CircularBuffer *ring_buf)
 {
-    if (ring_buf == NULL)
+    if (!ring_buf)
         return 0;
 
     uint32_t len = 0;
@@ -64,9 +60,9 @@ uint32_t ring_buffer_len(ring_buffer *ring_buf)
     return len;
 }
 
-uint32_t ring_buffer_get(ring_buffer *ring_buf, void *buffer, uint32_t size)
+uint32_t readFromCircularBuffer(CircularBuffer *ring_buf, void *buffer, uint32_t size)
 {
-    if (ring_buf == NULL || buffer == NULL)
+    if (!ring_buf || !buffer)
         return 0;
 
     pthread_mutex_lock(&ring_buf->lock);
@@ -85,7 +81,7 @@ uint32_t ring_buffer_get(ring_buffer *ring_buf, void *buffer, uint32_t size)
     return size;
 }
 
-uint32_t ring_buffer_put(ring_buffer *ring_buf, void *buffer, uint32_t size)
+uint32_t writeToCircularBuffer(CircularBuffer *ring_buf, void *buffer, uint32_t size)
 {
     if (ring_buf == NULL || buffer == NULL)
         return 0;

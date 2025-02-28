@@ -188,3 +188,13 @@ int Connect(SOCKET sockfd, char *ip, uint16_t port, int timeout)
 	
 	return is_connected;
 }
+
+int Read(SOCKET sockfd, char *data, uint32_t len)
+{
+    return recv(sockfd, data, len, 0);
+}
+
+int Fread(FILE *fp, char *data, uint32_t len)
+{
+    return fread(data, 1, len, fp);
+}

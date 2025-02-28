@@ -1,5 +1,5 @@
 #include "shm-cache.h"
-#include "ring-buffer.h"
+#include "circular_buffer.h"
 
 shm_cache_ptr shm_cache_init(uint32_t size)
 {
