@@ -18,7 +18,7 @@ int sync_function_trigger(void *args)
 
 int main()
 {
-    sche_ptr scher = net_create_scheduler();
+    TaskScheduler * scher = createTaskScheduler();
     if (scher == NULL)
     {
         ERR("create Scheduler");
@@ -27,15 +27,15 @@ int main()
 
     for (int i = 0; i < 20; i++)
     {
-        net_add_trigger_task(scher, async_function_trigger, NULL, 0);
+        addTriggerTask(scher, async_function_trigger, NULL, 0);
     }
 
-    net_add_trigger_task(scher, sync_function_trigger, NULL, 1);
+    addTriggerTask(scher, sync_function_trigger, NULL, 1);
     int number = 5;
     while (number > 0)
     {
         sleep(1);
         number--;
     }
-    net_destroy_scheduler(scher);
+    destroyTaskScheduler(scher);
 }

@@ -1,5 +1,5 @@
 #include "net-common.h"
-#include "kernel-list.h"
+#include "kernel_list.h"
 
 typedef struct kernel_list{
 	int data;

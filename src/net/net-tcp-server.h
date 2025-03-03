@@ -4,7 +4,7 @@
 #include "net-schedule.h"
 
 typedef int (*recv_func)(void *user);
-typedef void *(*init_func)(SOCKET fd, sche_ptr scher, void *gop);
+typedef void *(*init_func)(SOCKET fd, TaskScheduler * scher, void *gop);
 typedef int (*deinit_func)(void *user);
 
 typedef struct 
@@ -19,15 +19,15 @@ typedef struct
 {
     session_ptr session;
     SOCKET tcp_sockfd;
-    ev_ptr ev;
+    EpollEvent * ev;
     void *server;
 } tcp_connection_info, *connect_ptr;
 
 typedef struct
 {
     SOCKET tcp_sockfd;
-    sche_ptr scher;
-    ev_ptr ev;
+    TaskScheduler * scher;
+    EpollEvent * ev;
     char ip[256];
     int port;
     task_list *connect_list;

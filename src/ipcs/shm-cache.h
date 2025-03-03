@@ -1,7 +1,7 @@
 #ifndef __SHM_CACHE_H__
 #define __SHM_CACHE_H__
 #include "net-common.h"
-#include "net-task.h"
+#include "fifoqueue.h"
 
 typedef struct 
 {

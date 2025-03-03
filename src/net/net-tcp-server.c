@@ -11,7 +11,7 @@ void tcp_close_connection(connect_ptr conn)
         conn->session->session_deinit(conn->session->user);
 
     if (conn->ev)
-        net_delete_reader(conn->ev);
+        deleteReader(conn->ev);
 
     if (conn->tcp_sockfd > 0)
         closeTcpSocket(conn->tcp_sockfd);
@@ -130,10 +130,10 @@ int tcp_new_connection(int fd, void *args)
 
     LOG("new connection: %d, %p", conn->tcp_sockfd, conn);
 
-    conn->ev = net_create_reader(server->scher, conn->tcp_sockfd, tcp_recv_msg, (void *)conn);
+    conn->ev = createReader(server->scher, conn->tcp_sockfd, tcp_recv_msg, (void *)conn);
     if (conn->ev == NULL)
     {
-        ERR("net_create_reader error %p", conn);
+        ERR("createReader error %p", conn);
         tcp_close_connection(conn);
         net_free(conn);
         return NET_FAIL;
@@ -198,14 +198,14 @@ server_ptr tcp_start_server(const char *ip, int port,
         goto error;
     }
 
-    server->scher = net_create_scheduler();
+    server->scher = createTaskScheduler();
     if (server->scher == NULL)
     {
         ERR("create Scheduler");
         goto error;
     }
 
-    server->ev = net_create_reader(server->scher, server->tcp_sockfd, tcp_new_connection, (void *)server);
+    server->ev = createReader(server->scher, server->tcp_sockfd, tcp_new_connection, (void *)server);
     if (server->ev == NULL)
     {
         ERR("create createReader");
@@ -230,7 +230,7 @@ void tcp_stop_server(server_ptr server)
     tcp_close_all_connection(server);
 
     if (server->ev)
-        net_delete_reader(server->ev);
+        deleteReader(server->ev);
 
     if (server->tcp_sockfd > 0)
         closeTcpSocket(server->tcp_sockfd);
@@ -238,7 +238,7 @@ void tcp_stop_server(server_ptr server)
     net_free(server->session);
     
     if (server->scher)
-        net_destroy_scheduler(server->scher);
+        destroyTaskScheduler(server->scher);
 
     LOG("delete server %p", server);
 

@@ -53,7 +53,7 @@ static void epoll_deinit(void *ctx)
     net_free(ec);
 }
 
-static int epoll_add(void *ctx, ev_ptr event)
+static int epoll_add(void *ctx, EpollEvent * event)
 {
     struct epoll_ctx *ec = (struct epoll_ctx *)ctx;
     struct epoll_event epev;
@@ -88,7 +88,7 @@ static int epoll_add(void *ctx, ev_ptr event)
     return NET_SUCCESS;
 }
 
-static int epoll_del(void *ctx, ev_ptr event)
+static int epoll_del(void *ctx, EpollEvent * event)
 {
     struct epoll_ctx *ec = (struct epoll_ctx *)ctx;
     if (NET_FAIL == epoll_ctl(ec->epfd, EPOLL_CTL_DEL, event->evfd, NULL))
@@ -99,7 +99,7 @@ static int epoll_del(void *ctx, ev_ptr event)
     return NET_SUCCESS;
 }
 
-static int epoll_mod(void *ctx, ev_ptr event)
+static int epoll_mod(void *ctx, EpollEvent * event)
 {
     struct epoll_ctx *ec = (struct epoll_ctx *)ctx;
     struct epoll_event epev;
@@ -159,7 +159,7 @@ static int epoll_dispatch(void *ctx, int timeout)
     for (int i = 0; i < n; i++)
     {
         int what = events[i].events;
-        ev_ptr handle = (ev_ptr )events[i].data.ptr;
+        EpollEvent * handle = (EpollEvent * )events[i].data.ptr;
 
         if (what & (EPOLLHUP | EPOLLERR))
         {

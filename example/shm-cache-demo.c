@@ -45,14 +45,14 @@ int main()
     if (cache == NULL)
         return -1;
 
-    sche_ptr scher_put = net_create_scheduler();
+    TaskScheduler * scher_put = createTaskScheduler();
     if (scher_put == NULL)
     {
         ERR("create Scheduler");
         return -1;
     }
 
-    sche_ptr scher_get = net_create_scheduler();
+    TaskScheduler * scher_get = createTaskScheduler();
     if (scher_get == NULL)
     {
         ERR("create Scheduler");
@@ -60,9 +60,9 @@ int main()
     }
 
 
-    net_add_timer_task(scher_put, 0, 20, function_timer_put, (void *)cache);
+    addTimerTask(scher_put, 0, 20, function_timer_put, (void *)cache);
 
-    net_add_timer_task(scher_get, 1000, 20, function_timer_get, (void *)cache);
+    addTimerTask(scher_get, 1000, 20, function_timer_get, (void *)cache);
 
     while (1)
     {

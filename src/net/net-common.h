@@ -40,7 +40,7 @@ extern "C" {
 
 #include "log.h"
 #include "bitstream.h"
-#include "kernel-list.h"
+#include "kernel_list.h"
 #include "timestamp.h"
 #include "cJSON.h"
 #include "net-tcpsocket.h"
@@ -67,6 +67,97 @@ extern "C" {
     } \
 } while (0)
 
+// 定义互斥锁结构体
+typedef struct {
+    pthread_cond_t cond;
+} Cond;
+
+// 初始化条件信号
+#define COND_INIT(m) do { \
+    if (pthread_cond_init(&(m)->cond, NULL) != 0) { \
+        perror("Cond initialization failed"); \
+        exit(EXIT_FAILURE); \
+    } \
+} while (0)
+
+// 销毁条件信号
+#define COND_DESTROY(m) do { \
+    if (pthread_cond_destroy(&(m)->cond) != 0) { \
+        perror("Cond destruction failed"); \
+        exit(EXIT_FAILURE); \
+    } \
+} while (0)
+
+// 发送信号
+#define COND_SIGNAL(m) do { \
+    if (pthread_cond_signal(&(m)->cond) != 0) { \
+        perror("Cond signal failed"); \
+        exit(EXIT_FAILURE); \
+    } \
+} while (0)
+
+
+// 等待阻塞条件
+#define COND_WAIT(m, l) do { \
+    if (pthread_cond_wait(&(m)->cond, &(l)->mutex) != 0) { \
+        perror("Cond signal failed"); \
+        exit(EXIT_FAILURE); \
+    } \
+} while (0)
+
+// 定义互斥锁结构体
+typedef struct {
+    pthread_mutex_t mutex;
+} Mutex;
+
+// 初始化互斥锁
+#define MUTEX_INIT(m) do { \
+    if (pthread_mutex_init(&(m)->mutex, NULL) != 0) { \
+        perror("Mutex initialization failed"); \
+        exit(EXIT_FAILURE); \
+    } \
+} while (0)
+
+// 销毁互斥锁
+#define MUTEX_DESTROY(m) do { \
+    if (pthread_mutex_destroy(&(m)->mutex) != 0) { \
+        perror("Mutex destruction failed"); \
+        exit(EXIT_FAILURE); \
+    } \
+} while (0)
+
+// 加锁
+#define MUTEX_LOCK(m) do { \
+    if (pthread_mutex_lock(&(m)->mutex) != 0) { \
+        perror("Mutex lock failed"); \
+        exit(EXIT_FAILURE); \
+    } \
+} while (0)
+
+// 解锁
+#define MUTEX_UNLOCK(m) do { \
+    if (pthread_mutex_unlock(&(m)->mutex) != 0) { \
+        perror("Mutex unlock failed"); \
+        exit(EXIT_FAILURE); \
+    } \
+} while (0)
+
+
+#define CREATE_THREAD(thread, function, arg, attr) \
+    do { \
+        if (pthread_create(&(thread), (attr), (function), (arg)) != 0) { \
+            perror("Failed to create thread"); \
+            exit(EXIT_FAILURE); \
+        } \
+    } while (0)
+
+#define JOIN_THREAD(thread) \
+    do { \
+        if (pthread_join((thread), NULL) != 0) { \
+            perror("Failed to join thread"); \
+            exit(EXIT_FAILURE); \
+        } \
+    } while (0)
 
 typedef struct {
     int frame_type;            // 帧类型

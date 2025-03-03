@@ -2,7 +2,7 @@
 #define __SCHULE_H__
 
 #include "net-common.h"
-#include "net-task.h"
+#include "fifoqueue.h"
 
 #define SHECH_RUNNING   1
 #define SHECH_STOP      0
@@ -20,8 +20,8 @@
         ERR(fmt, ##args);    \
     }
 
-typedef int (*task_function)(void *arg);
-typedef int (*event_function)(int fd, void *arg);
+typedef int (*TriggerFunc)(void *arg);
+typedef int (*EventFunc)(int fd, void *arg);
 
 typedef enum {
     EVENT_TIMEOUT  = 1<<0,
@@ -34,13 +34,7 @@ typedef enum {
     EVENT_CLOSED   = 1<<7,
     EVENT_ERROR    = 1<<8,
     EVENT_EXCEPT   = 1<<9,
-} event_flags;
-
-typedef struct
-{
-    long long task_id;
-    int result;
-} result_info, *result_ptr;
+} EventFlags;
 
 typedef struct 
 {
@@ -48,8 +42,8 @@ typedef struct
     void *scher;
     void *args;
     int sync_flags;
-    task_function function;
-} trigger_info, *trigger_ptr;
+    TriggerFunc function;
+} TriggerEvent;
 
 typedef struct 
 {
@@ -59,55 +53,54 @@ typedef struct
     void *args;
     long long time_stamp;
     int async_del_flags;
-    task_function function;
-} timer_info, *timer_ptr;
+    TriggerFunc function;
+} TaskTimer;
 
 typedef struct 
 {
     void *scher;
     SOCKET evfd;
-    event_flags flags;
+    EventFlags flags;
     void *args;
-    event_function function;
-} event_info, *ev_ptr;
+    EventFunc function;
+} EpollEvent;
 
 typedef struct {
     void *(*init)();
     void (*deinit)(void *ctx);
-    int (*add)(void *ctx, ev_ptr event);
-    int (*del)(void *ctx, ev_ptr event);
-    int (*mod)(void *ctx, ev_ptr event);
+    int (*add)(void *ctx, EpollEvent * event);
+    int (*del)(void *ctx, EpollEvent * event);
+    int (*mod)(void *ctx, EpollEvent * event);
     int (*dispatch)(void *ctx, int timeout);
 } event_ops;
 
 typedef struct
 {
     volatile int loop;
-    ev_ptr inner_signal;
+    EpollEvent * inner_signal;
     SOCKET inner_fd;
     void *ctx;
     event_ops *ops;
-    task_list *trigger_list;
-    task_list *timer_list;
-    task_list *result_list;
+    task_list *triggerTaskQueue;
+    task_list *timerTaskQueue;
     pthread_t sch_pid;
-    pthread_mutex_t lock;
-    pthread_cond_t cond;
-} scheduler_info, *sche_ptr;
+    Mutex myMutex;
+    Cond myCond;
+} TaskScheduler;
 
-sche_ptr net_create_scheduler(void);
-void net_destroy_scheduler(sche_ptr scher);
+TaskScheduler * createTaskScheduler(void);
+void destroyTaskScheduler(TaskScheduler * scher);
 
-ev_ptr net_create_reader(sche_ptr scher, SOCKET fd, event_function function, void *args);
-void net_delete_reader(ev_ptr event);
-void net_async_delete_reader(ev_ptr event);
-int net_modify_reader(ev_ptr event);
+EpollEvent * createReader(TaskScheduler * scher, SOCKET fd, EventFunc function, void *args);
+void deleteReader(EpollEvent * event);
+void asyncDeleteReader(EpollEvent * event);
+int modifyReader(EpollEvent * event);
 
-long long net_add_trigger_task(sche_ptr scher, task_function function, void *args, int sync_flags);
+long long addTriggerTask(TaskScheduler * scher, TriggerFunc function, void *args, int sync_flags);
 
-timer_ptr net_add_timer_task(sche_ptr scher, int fist_ms, int repeat_ms, task_function function, void *args);
-void net_delete_timer_task(timer_ptr timer);
-void net_async_delete_timer_task(timer_ptr timer);
-int net_modify_timer_task(timer_ptr timer, int repeat_ms);
+TaskTimer * addTimerTask(TaskScheduler * scher, int fist_ms, int repeat_ms, TriggerFunc function, void *args);
+void deleteTimerTask(TaskTimer * timer);
+void asyncDeleteTimerTask(TaskTimer * timer);
+int modifyTimerTask(TaskTimer * timer, int repeat_ms);
 
 #endif // !__SCHULE_H__

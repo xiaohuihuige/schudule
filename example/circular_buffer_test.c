@@ -32,28 +32,28 @@ int main()
     CircularBuffer * buffer = createCircularBuffer(4096 * 2);
     if (buffer == NULL)
         return -1;
-    sche_ptr scher_push = net_create_scheduler();
+    TaskScheduler * scher_push = createTaskScheduler();
     if (scher_push == NULL)
     {
         ERR("create Scheduler");
         return -1;
     }
 
-    sche_ptr scher_pull = net_create_scheduler();
+    TaskScheduler * scher_pull = createTaskScheduler();
     if (scher_push == NULL)
     {
         ERR("create Scheduler");
         return -1;
     }
 
-    net_add_timer_task(scher_push, 1000, 200, function_timer_push, (void *)buffer);
-    net_add_timer_task(scher_pull, 3000, 500, function_timer_pull, (void *)buffer);
+    addTimerTask(scher_push, 1000, 200, function_timer_push, (void *)buffer);
+    addTimerTask(scher_pull, 3000, 500, function_timer_pull, (void *)buffer);
 
     while (1)
     {
         sleep(1);
     }
 
-    net_destroy_scheduler(scher_push);
-    net_destroy_scheduler(scher_pull);
+    destroyTaskScheduler(scher_push);
+    destroyTaskScheduler(scher_pull);
 }
