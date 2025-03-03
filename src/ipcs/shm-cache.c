@@ -41,7 +41,7 @@ void shm_cache_unint(shm_cache_ptr cache)
     {
         pthread_mutex_destroy(&cache->lock);
         net_free(cache->memory);
-        net_task_list_each_free(cache->record_list, cache_record);
+        destroyFifoQueue(cache->record_list, cache_record);
         net_free(cache);
     }
 }
@@ -59,9 +59,9 @@ static int shm_cache_get_distance(shm_cache_ptr cache)
     return NET_SUCCESS;
 }
 
-static record_ptr shm_cache_get_next(task_list *head)
+static record_ptr shm_cache_get_next(FifoQueue *head)
 {   
-    task_list *task_node = dequeue(head);
+    FifoQueue *task_node = dequeue(head);
     if (task_node == NULL)
         return NULL;
         

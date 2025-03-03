@@ -3,7 +3,7 @@
 
 #include "net-common.h"
 
-inline static SOCKET net_create_signal(void)
+inline static SOCKET createSignal(void)
 {
     int inner_fd = eventfd(0, 0);
     if (inner_fd == -1) {
@@ -13,7 +13,7 @@ inline static SOCKET net_create_signal(void)
     return inner_fd;
 }
 
-inline static int net_send_signal(SOCKET signal_fd)
+inline static int sendSignal(SOCKET signal_fd)
 {
     assert(signal_fd > 0);
 
@@ -25,7 +25,7 @@ inline static int net_send_signal(SOCKET signal_fd)
     return NET_SUCCESS;
 }
 
-inline static int net_recv_signal(SOCKET signal_fd, void *arg)
+inline static int recvSignal(SOCKET signal_fd, void *arg)
 {
     assert(signal_fd > 0);
         
@@ -37,7 +37,7 @@ inline static int net_recv_signal(SOCKET signal_fd, void *arg)
     return NET_SUCCESS;
 }
 
-inline static void net_close_signal(SOCKET signal_fd)
+inline static void closeSignal(SOCKET signal_fd)
 {
     if (signal_fd > 0)
         close(signal_fd);

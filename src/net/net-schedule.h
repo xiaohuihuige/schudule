@@ -81,8 +81,8 @@ typedef struct
     SOCKET inner_fd;
     void *ctx;
     event_ops *ops;
-    task_list *triggerTaskQueue;
-    task_list *timerTaskQueue;
+    FifoQueue *triggerTaskQueue;
+    FifoQueue *timerTaskQueue;
     pthread_t sch_pid;
     Mutex myMutex;
     Cond myCond;

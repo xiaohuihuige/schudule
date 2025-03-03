@@ -25,7 +25,7 @@ typedef struct
     int write_index;
     uint8_t *memory;
     uint32_t size;
-    task_list *record_list;
+    FifoQueue *record_list;
     pthread_mutex_t lock;
 } shm_cache_info, *shm_cache_ptr;
 

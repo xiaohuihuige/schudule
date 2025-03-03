@@ -30,7 +30,7 @@ typedef struct
     EpollEvent * ev;
     char ip[256];
     int port;
-    task_list *connect_list;
+    FifoQueue *connect_list;
     session_ptr session;
     void *gop;
 } tcp_server_info, *server_ptr;

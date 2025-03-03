@@ -7,9 +7,9 @@ typedef struct
 {
     void *task;
     struct list_head list;
-} task_list;
+} FifoQueue;
 
-#define net_task_list_del(head, type) \
+#define deleteFifoQueueTask(head, type) \
     {                                 \
         list_del(&head->list);        \
         if ((type *)head->task)       \
@@ -19,41 +19,41 @@ typedef struct
         net_free(head)                \
     }
 
-#define net_task_list_each_free(head, type)                             \
+#define destroyFifoQueue(head, type)                             \
     {                                                                   \
-        task_list *task_pos = NULL;                                     \
-        task_list *temp_pos = NULL;                                      \
-        list_for_each_entry_safe(task_pos, temp_pos, &((task_list *)head)->list, list) \
+        FifoQueue *task_pos = NULL;                                     \
+        FifoQueue *temp_pos = NULL;                                      \
+        list_for_each_entry_safe(task_pos, temp_pos, &((FifoQueue *)head)->list, list) \
         {                                                               \
-            net_task_list_del(task_pos, type);                          \
+            deleteFifoQueueTask(task_pos, type);                          \
         }                                                               \
         net_free(head)                                                  \
     }
 
-#define net_task_list_find(head, head_pos, type, find_task)             \
+#define findFifoQueueTask(head, head_pos, type, find_task)             \
     {                                                                   \
-        task_list *temp_pos = NULL;                                     \
-        list_for_each_entry_safe(head_pos, temp_pos, &((task_list *)head)->list, list) \
+        FifoQueue *temp_pos = NULL;                                     \
+        list_for_each_entry_safe(head_pos, temp_pos, &((FifoQueue *)head)->list, list) \
         {                                                               \
             if (head_pos->task == find_task)                            \
                 break;                                                  \
         }                                                               \
     }
 
-#define net_task_list_find_del(head, type, del_task)       \
+#define FindDeleteFifoQueueTask(head, type, del_task)       \
     {                                                      \
-        task_list *del_pos = NULL;                         \
-        net_task_list_find(head, del_pos, type, del_task); \
+        FifoQueue *del_pos = NULL;                         \
+        findFifoQueueTask(head, del_pos, type, del_task); \
         if (del_pos && del_pos->task == del_task)          \
         {                                                  \
-            net_task_list_del(del_pos, type)               \
+            deleteFifoQueueTask(del_pos, type)               \
         }                                                  \
     }
 
 
-static inline task_list *createFifiQueue(void)
+static inline FifoQueue *createFifiQueue(void)
 {
-    task_list *head = (task_list *)calloc(1, sizeof(task_list));
+    FifoQueue *head = (FifoQueue *)calloc(1, sizeof(FifoQueue));
     if (!head)
     {
         ERR("malloc failed");
@@ -64,9 +64,9 @@ static inline task_list *createFifiQueue(void)
     return head;
 }
 
-static inline task_list *enqueue(task_list *head, void *task)
+static inline FifoQueue *enqueue(FifoQueue *head, void *task)
 {
-    task_list *new_task = (task_list *)calloc(1, sizeof(task_list));
+    FifoQueue *new_task = (FifoQueue *)calloc(1, sizeof(FifoQueue));
     if (!new_task)
     {
         ERR("malloc failed");
@@ -80,12 +80,12 @@ static inline task_list *enqueue(task_list *head, void *task)
     return new_task;
 }
 
-static inline task_list *dequeue(task_list *head)
+static inline FifoQueue *dequeue(FifoQueue *head)
 {   
     if (list_empty(&head->list))
         return NULL;
         
-    task_list *task_node = list_first_entry(&head->list, task_list, list);
+    FifoQueue *task_node = list_first_entry(&head->list, FifoQueue, list);
     if (!task_node)
     {
         return NULL;

@@ -22,8 +22,8 @@ void tcp_close_find_connection(server_ptr server, connect_ptr close_conn)
     if (server == NULL || server->connect_list == NULL)
         return;
 
-    task_list *task_node = NULL;
-    task_list *temp_node = NULL;
+    FifoQueue *task_node = NULL;
+    FifoQueue *temp_node = NULL;
     list_for_each_entry_safe(task_node, temp_node, &server->connect_list->list, list)
     {
         connect_ptr conn = (connect_ptr)task_node->task;
@@ -33,7 +33,7 @@ void tcp_close_find_connection(server_ptr server, connect_ptr close_conn)
         if (close_conn == conn)
         {
             tcp_close_connection(conn);
-            net_task_list_del(task_node, tcp_connection_info);
+            deleteFifoQueueTask(task_node, tcp_connection_info);
         }
     }
 }
@@ -43,8 +43,8 @@ void tcp_close_all_connection(server_ptr server)
     if (server == NULL || server->connect_list == NULL)
         return;
 
-    task_list *task_node = NULL;
-    task_list *temp_node = NULL;
+    FifoQueue *task_node = NULL;
+    FifoQueue *temp_node = NULL;
     list_for_each_entry_safe(task_node, temp_node, &server->connect_list->list, list)
     {
         connect_ptr conn = (connect_ptr)task_node->task;
@@ -53,7 +53,7 @@ void tcp_close_all_connection(server_ptr server)
 
         tcp_close_connection(conn);
 
-        net_task_list_del(task_node, tcp_connection_info);
+        deleteFifoQueueTask(task_node, tcp_connection_info);
     }
 }
 
@@ -62,8 +62,8 @@ void tcp_push_stream_connection(server_ptr server, uint8_t *data, int size , int
     if (server == NULL || server->connect_list == NULL)
         return;
 
-    task_list *task_node = NULL;
-    task_list *temp_node = NULL;
+    FifoQueue *task_node = NULL;
+    FifoQueue *temp_node = NULL;
     list_for_each_entry_safe(task_node, temp_node, &server->connect_list->list, list)
     {
         connect_ptr conn = (connect_ptr)task_node->task;
@@ -89,7 +89,7 @@ int tcp_recv_msg(int fd, void *args)
     if (size <= 0)
     {
         tcp_close_connection(conn);
-        net_task_list_find_del(server->connect_list, tcp_connection_info, conn);
+        FindDeleteFifoQueueTask(server->connect_list, tcp_connection_info, conn);
         return NET_FAIL;
     }
 
