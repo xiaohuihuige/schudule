@@ -51,7 +51,7 @@ typedef struct
     }
 
 
-static inline task_list *net_task_list_init(void)
+static inline task_list *createFifiQueue(void)
 {
     task_list *head = (task_list *)calloc(1, sizeof(task_list));
     if (!head)
@@ -64,7 +64,7 @@ static inline task_list *net_task_list_init(void)
     return head;
 }
 
-static inline task_list *net_task_list_add_tail(task_list *head, void *task)
+static inline task_list *enqueue(task_list *head, void *task)
 {
     task_list *new_task = (task_list *)calloc(1, sizeof(task_list));
     if (!new_task)
@@ -80,7 +80,7 @@ static inline task_list *net_task_list_add_tail(task_list *head, void *task)
     return new_task;
 }
 
-static inline task_list *net_task_list_pop_head(task_list *head)
+static inline task_list *dequeue(task_list *head)
 {   
     if (list_empty(&head->list))
         return NULL;

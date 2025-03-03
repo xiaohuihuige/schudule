@@ -159,6 +159,16 @@ typedef struct {
         } \
     } while (0)
 
+#define CALLOC(num, type) \
+    ({ \
+        type* ptr = (type*)calloc((num), sizeof(type)); \
+        if (ptr == NULL) { \
+            fprintf(stderr, "Memory allocation failed!\n"); \
+            exit(EXIT_FAILURE); \
+        } \
+        ptr; \
+    })
+
 typedef struct {
     int frame_type;            // 帧类型
     long long timestamp;       // 时间戳

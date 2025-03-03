@@ -10,7 +10,7 @@ shm_cache_ptr shm_cache_init(uint32_t size)
     shm_cache_ptr cache = NULL;
 
     do {
-        cache = (shm_cache_ptr)calloc(1, sizeof(shm_cache_info));
+        cache = CALLOC(1, shm_cache_info);
         if (cache == NULL)
             break;
 
@@ -18,7 +18,7 @@ shm_cache_ptr shm_cache_init(uint32_t size)
         if (cache->memory == NULL)
             break;
 
-        cache->record_list = net_task_list_init();
+        cache->record_list = createFifiQueue();
         if (cache->record_list == NULL)
             break;
 
@@ -61,7 +61,7 @@ static int shm_cache_get_distance(shm_cache_ptr cache)
 
 static record_ptr shm_cache_get_next(task_list *head)
 {   
-    task_list *task_node = net_task_list_pop_head(head);
+    task_list *task_node = dequeue(head);
     if (task_node == NULL)
         return NULL;
         
@@ -88,7 +88,7 @@ static int _shm_cache_put(shm_cache_ptr cache, uint8_t *data, int size)
         uint32_t left_over = size;
         uint32_t write_len = 0;
 
-        record_ptr record = (record_ptr)calloc(1, sizeof(cache_record));
+        record_ptr record = CALLOC(1, cache_record);
         if (record == NULL)
             return NET_FAIL;
 
@@ -107,7 +107,7 @@ static int _shm_cache_put(shm_cache_ptr cache, uint8_t *data, int size)
             cache->write_index += size;
         }
         record->end = cache->write_index;
-        net_task_list_add_tail(cache->record_list, (void *)record);
+        enqueue(cache->record_list, (void *)record);
     } else if (available_len < size)
     {
         record_ptr record = shm_cache_get_next(cache->record_list);

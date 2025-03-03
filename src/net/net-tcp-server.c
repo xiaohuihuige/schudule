@@ -139,7 +139,7 @@ int tcp_new_connection(int fd, void *args)
         return NET_FAIL;
     }
 
-    net_task_list_add_tail(server->connect_list, (void *)conn);
+    enqueue(server->connect_list, (void *)conn);
 
     return NET_SUCCESS;
 }
@@ -166,7 +166,7 @@ server_ptr tcp_start_server(const char *ip, int port,
     server->session->recvf = recvf;
     server->gop = gop;
     
-    server->connect_list = net_task_list_init();
+    server->connect_list = createFifiQueue();
     if (server->connect_list == NULL)
     {
         ERR("create server->connect_list error");

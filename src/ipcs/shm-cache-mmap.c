@@ -5,7 +5,7 @@ shm_ptr shm_mmap_init(const char *shm_name, int size, int flags)
     int code = NET_FAIL;
     shm_ptr sp = NULL;
     do {
-        sp = (shm_ptr)calloc(1, sizeof(shm_mmap));
+        sp = CALLOC(1, shm_mmap);
         if (sp == NULL)
             break;
 

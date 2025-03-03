@@ -8,7 +8,7 @@ static int _triggerEvent(TaskScheduler * scher)
     assert(scher);
 
     MUTEX_LOCK(&scher->myMutex);
-    task_list *task_node = net_task_list_pop_head(scher->triggerTaskQueue);
+    task_list *task_node = dequeue(scher->triggerTaskQueue);
     if (!task_node) {
         MUTEX_UNLOCK(&scher->myMutex);
         return 0;
@@ -116,7 +116,7 @@ long long addTriggerTask(TaskScheduler * scher, TriggerFunc function, void *args
     SDBG("add trigger task... task_id %lld", trigger->task_id);
 
     MUTEX_LOCK(&scher->myMutex);
-    net_task_list_add_tail(scher->triggerTaskQueue, (void *)trigger);
+    enqueue(scher->triggerTaskQueue, (void *)trigger);
     MUTEX_UNLOCK(&scher->myMutex);
 
     net_send_signal(scher->inner_fd);
@@ -147,7 +147,7 @@ TaskTimer * addTimerTask(TaskScheduler * scher, int fist_ms, int repeat_ms, Trig
     timer->async_del_flags = 0;
 
     MUTEX_LOCK(&scher->myMutex);
-    net_task_list_add_tail(scher->timerTaskQueue, (void *)timer);
+    enqueue(scher->timerTaskQueue, (void *)timer);
     MUTEX_UNLOCK(&scher->myMutex);
 
     net_send_signal(scher->inner_fd);
@@ -296,11 +296,11 @@ TaskScheduler * createTaskScheduler(void)
         if (!scher->ctx)
             break;
  
-        scher->timerTaskQueue = net_task_list_init();
+        scher->timerTaskQueue = createFifiQueue();
         if (!scher->timerTaskQueue)
             break;
     
-        scher->triggerTaskQueue = net_task_list_init();
+        scher->triggerTaskQueue = createFifiQueue();
         if (!scher->triggerTaskQueue)
             break;
 
