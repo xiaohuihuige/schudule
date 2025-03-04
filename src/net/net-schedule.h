@@ -57,7 +57,7 @@ typedef struct
     int first_ms;
     void *args;
     long long time_stamp;
-    int async_del_flags;
+    volatile int async_del_flags;
     TriggerFunc function;
 } TaskTimer;
 
