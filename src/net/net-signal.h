@@ -5,12 +5,12 @@
 
 inline static SOCKET createSignal(void)
 {
-    int inner_fd = eventfd(0, 0);
-    if (inner_fd == -1) {
+    int signalFd = eventfd(0, 0);
+    if (signalFd == -1) {
         ERR("eventfd failed %d", errno);
         return NET_FAIL;
     }
-    return inner_fd;
+    return signalFd;
 }
 
 inline static int sendSignal(SOCKET signal_fd)

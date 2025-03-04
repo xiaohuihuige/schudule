@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
     TaskTimer * timer_repeat = addTimerTask(scher, 3000, 1000, function_timer_repeat, NULL);
 
     LOG("time:[%lld]", get_time_ms());
-    LOG("list_count_nodes:[%ld]", list_count_nodes(&scher->timerTaskQueue->list));
+    LOG("list_count_nodes:[%ld]", list_count_nodes(&scher->timerQueue->list));
 
     int number = 50;
     while (number > 10)
@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
         {
             modifyTimerTask(timer_repeat, 3000);
 
-            LOG("list_count_nodes:[%ld]", list_count_nodes(&scher->timerTaskQueue->list));
+            LOG("list_count_nodes:[%ld]", list_count_nodes(&scher->timerQueue->list));
         }
 
         if (number == 30)
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    LOG("list_count_nodes:[%ld]", list_count_nodes(&scher->timerTaskQueue->list));
+    LOG("list_count_nodes:[%ld]", list_count_nodes(&scher->timerQueue->list));
 
     destroyTaskScheduler(scher);
 }

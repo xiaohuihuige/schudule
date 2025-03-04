@@ -8,6 +8,10 @@
 #define SHECH_STOP      0
 #define SHECH_DEBUG     0
 
+#define ASYNC_FLAGS     0
+#define SYNC_FLAGS      1 
+
+
 #define SDBG(fmt, args...) \
     if (SHECH_DEBUG)       \
     {                      \
@@ -43,6 +47,7 @@ typedef struct
     void *args;
     int sync_flags;
     TriggerFunc function;
+    Cond condition;
 } TriggerEvent;
 
 typedef struct 
@@ -67,25 +72,25 @@ typedef struct
 
 typedef struct {
     void *(*init)();
-    void (*deinit)(void *ctx);
-    int (*add)(void *ctx, EpollEvent * event);
-    int (*del)(void *ctx, EpollEvent * event);
-    int (*mod)(void *ctx, EpollEvent * event);
-    int (*dispatch)(void *ctx, int timeout);
+    void (*deinit)(void *context);
+    int (*add)(void *context, EpollEvent * event);
+    int (*del)(void *context, EpollEvent * event);
+    int (*mod)(void *context, EpollEvent * event);
+    int (*dispatch)(void *context, int timeout);
 } event_ops;
 
 typedef struct
 {
-    volatile int loop;
-    EpollEvent * inner_signal;
-    SOCKET inner_fd;
-    void *ctx;
+    volatile int isRunning;
+    EpollEvent * signalEvents;
+    SOCKET signalFd;
+    void *context;
     event_ops *ops;
-    FifoQueue *triggerTaskQueue;
-    FifoQueue *timerTaskQueue;
-    pthread_t sch_pid;
+    FifoQueue *taskQueue;
+    FifoQueue *timerQueue;
+    pthread_t workerThread;
     Mutex myMutex;
-    Cond myCond;
+    Cond condition;
 } TaskScheduler;
 
 TaskScheduler * createTaskScheduler(void);

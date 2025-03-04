@@ -5,4 +5,6 @@
 long long get_time_ms(void);
 long long get_time_us(void);
 
+void get_now_date(char *buffer, int len);
+
 #endif // !__TIME_STAMP_H__
