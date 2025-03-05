@@ -7,12 +7,14 @@
 #define MAX_THREADS 4
 
 typedef struct {
-    volatile int shutdown;
     int threadCount;
     int thread_index;
+    Mutex myMutex;
     TaskScheduler **scher;
 } SchedulePool;
 
 SchedulePool *threadPoolCreate(int threadCount);
+void threadPoolAddTask(SchedulePool *pool, TriggerFunc function, void *arg);
+void threadPoolDestroy(SchedulePool *pool);
 
 #endif

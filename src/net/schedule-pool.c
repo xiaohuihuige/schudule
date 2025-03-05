@@ -7,29 +7,45 @@ SchedulePool *threadPoolCreate(int threadCount)
         return NULL;
 
     scherpool->threadCount  = threadCount;
-    scherpool->shutdown     = SHECH_RUNNING;
     scherpool->thread_index = 0;
 
-    TaskScheduler *scher[threadCount];
+    MUTEX_INIT(&scherpool->myMutex);
+
+    scherpool->scher = (TaskScheduler **)malloc(threadCount * sizeof(TaskScheduler *));
 
     for (int i = 0; i < threadCount; i++) {
-        scher[i] = createTaskScheduler();
+        scherpool->scher[i] = createTaskScheduler();
     }
 
-    scherpool->scher = scher;
+    LOG("Create thread successfull %p", scherpool);
 
     return scherpool;
 }
 
 void threadPoolAddTask(SchedulePool *pool, TriggerFunc function, void *arg)
 {
+    assert(pool);
+
+    MUTEX_LOCK(&pool->myMutex);
     addTriggerTask(pool->scher[pool->thread_index], function, arg, ASYNC_FLAGS);
     if (pool->thread_index == pool->threadCount) {
         pool->thread_index = 0;
     }
+    MUTEX_UNLOCK(&pool->myMutex);
 }
 
 void threadPoolDestroy(SchedulePool *pool) 
 {
+    assert(pool);
 
+    MUTEX_DESTROY(&pool->myMutex);
+
+    for (int i = 0; i < pool->threadCount; i++) {
+        if (pool->scher[i])
+            destroyTaskScheduler(pool->scher[i]);
+    }
+
+    LOG("Destroy thread successfull %p", pool);
+
+    FREE(pool);
 }

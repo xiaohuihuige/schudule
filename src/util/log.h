@@ -13,7 +13,7 @@
     do { \
         char date_buffer[100]; \
         get_now_ms_date(date_buffer, sizeof(date_buffer)); \
-        fprintf(stderr, "%s[%s][%s:%d]: " fmt "\n\033[0;39m", \
+        fprintf(stderr, "%s[%s] [%s:%d]: " fmt "\n\033[0;39m", \
                color, date_buffer, __FUNCTION__, __LINE__, ##__VA_ARGS__); \
     } while (0)
 
