@@ -26,3 +26,26 @@ void get_now_date(char *buffer, int len)
 
     return;
 }
+
+
+void get_now_ms_date(char *buffer, int len) 
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL); // 获取当前时间，包括微秒
+
+    time_t now = tv.tv_sec; // 获取秒
+    struct tm *tm_info = localtime(&now);
+    if (!tm_info) {
+        return;
+    }
+
+    // 格式化日期和时间，包含秒和毫秒
+    snprintf(buffer, len, "%04d-%02d-%02d %02d:%02d:%02d:%03ld",
+             tm_info->tm_year + 1900, // 年份
+             tm_info->tm_mon + 1,     // 月份
+             tm_info->tm_mday,        // 日期
+             tm_info->tm_hour,        // 小时
+             tm_info->tm_min,         // 分钟
+             tm_info->tm_sec,         // 秒
+             tv.tv_usec / 1000);      // 毫秒
+}

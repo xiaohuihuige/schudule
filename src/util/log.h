@@ -1,22 +1,26 @@
 #ifndef __LOG_H__
 #define __LOG_H__
 #include <stdio.h>
+#include "timestamp.h"
 
 #define RED_COLOR "\033[0;31m"
 #define RED_COLOR1 "\033[0;32m"
 #define RED_COLOR2 "\033[0;33m"
 #define RED_COLOR3 "\033[0;37m"
+#define GREEN_COLOR "\033[1;32m"   
 
-#define ERR(fmt, args...) \
-        printf("%s%-20s%-30s[%d]: "fmt"\n\033[0;39m",RED_COLOR,  strrchr(__FILE__, '/') + 1, __FUNCTION__,__LINE__,##args);
+#define LOG_LEVEL(color, fmt, ...) \
+    do { \
+        char date_buffer[100]; \
+        get_now_ms_date(date_buffer, sizeof(date_buffer)); \
+        fprintf(stderr, "%s[%s][%s:%d]: " fmt "\n\033[0;39m", \
+               color, date_buffer, __FUNCTION__, __LINE__, ##__VA_ARGS__); \
+    } while (0)
 
-#define WAR(fmt, args...) \
-        printf("%s%-20s%-30s[%d]: "fmt"\n\033[0;39m",RED_COLOR1, strrchr(__FILE__, '/') + 1,__FUNCTION__,__LINE__,##args);
+#define ERR(fmt, ...) LOG_LEVEL(RED_COLOR, fmt, ##__VA_ARGS__)
+#define WAR(fmt, ...) LOG_LEVEL(RED_COLOR1, fmt, ##__VA_ARGS__)
+#define LOG(fmt, ...) LOG_LEVEL(RED_COLOR2, fmt, ##__VA_ARGS__)
+#define DBG(fmt, ...) LOG_LEVEL(GREEN_COLOR, fmt, ##__VA_ARGS__)
 
-#define LOG(fmt, args...) \
-        printf("%s%-20s%-30s[%d]: "fmt"\n\033[0;39m",RED_COLOR2, strrchr(__FILE__, '/') + 1,__FUNCTION__,__LINE__,##args);
-
-#define DBG(fmt, args...) \
-        printf("%s%-20s%-30s[%d]: "fmt"\n\033[0;39m",RED_COLOR3, strrchr(__FILE__, '/') + 1,__FUNCTION__,__LINE__,##args);
 
 #endif // !__LOG_H__

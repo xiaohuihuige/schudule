@@ -1,5 +1,6 @@
 #include "net-schedule.h"
 #include "net-signal.h"
+#include "log.h"
 
 extern const struct event_ops epollops;
 
@@ -17,7 +18,7 @@ static int _triggerEvent(TaskScheduler * scher)
 
     TriggerEvent * trigger = (TriggerEvent *)task_node->task;
     if (trigger) {
-        //printf("doing function... task_id %lld, flag %d \n", trigger->task_id, trigger->sync_flags);
+        DBG("doing function... task_id %lld, flag %d", trigger->task_id, trigger->sync_flags);
         if (trigger->function)
             trigger->function(trigger->args);
         
@@ -33,6 +34,22 @@ static int _triggerEvent(TaskScheduler * scher)
     return 1;
 }
 
+static void _wakeupCond(TaskScheduler * scher)
+{
+    assert(scher);
+
+    FifoQueue *task_node = NULL;
+    FifoQueue *temp_node = NULL;
+    list_for_each_entry_safe(task_node, temp_node, &scher->taskQueue->list, list) {
+        TriggerEvent * trigger = (TriggerEvent *)task_node->task;
+        if (trigger && trigger->sync_flags) {
+            MUTEX_LOCK(&scher->myMutex);
+            COND_BROADCAST(&trigger->condition);
+            MUTEX_UNLOCK(&scher->myMutex);
+        }
+    }
+}
+
 static int _timerEvent(TaskScheduler * scher)
 {
     assert(scher);
@@ -43,6 +60,8 @@ static int _timerEvent(TaskScheduler * scher)
     FifoQueue *temp_node = NULL;
     list_for_each_entry_safe(task_node, temp_node, &scher->timerQueue->list, list) {
         TaskTimer * timer = (TaskTimer *)task_node->task;
+        if (!timer) 
+            continue;
 
         long long interval_time = start_time - timer->time_stamp;
         if (timer->first_ms == 0) {
@@ -93,7 +112,7 @@ static void *_eventLoop(void *obj)
         timeout += _timerEvent(scher);
 
         if (scher->ops->dispatch(scher->context, timeout)) 
-            SERR("dispatch failed");
+            ERR("dispatch failed");
     }
     return NULL;
 }
@@ -159,7 +178,7 @@ TaskTimer * addTimerTask(TaskScheduler * scher, int fist_ms, int repeat_ms, Trig
 
     sendSignal(scher->signalFd);
 
-    SDBG("create timer %p, first %d, repeat %d", timer, fist_ms, repeat_ms);
+    DBG("create timer %p, first %d, repeat %d", timer, fist_ms, repeat_ms);
 
     return timer;
 }
@@ -175,7 +194,7 @@ void deleteTimerTask(TaskTimer *timer)
     if (list_empty(&scher->timerQueue->list))
         return;
 
-    SDBG("delete timer task %p", timer);
+    DBG("delete timer task %p", timer);
 
     MUTEX_LOCK(&scher->myMutex);
     FindDeleteFifoQueueTask(scher->timerQueue, TaskTimer, timer);
@@ -201,7 +220,7 @@ void asyncDeleteTimerTask(TaskTimer * timer)
     }
     MUTEX_UNLOCK(&scher->myMutex);
 
-    SDBG("async delete timer task %p", timer);
+    DBG("async delete timer task %p", timer);
     return;
 }
 
@@ -227,7 +246,7 @@ int modifyTimerTask(TaskTimer * timer, int repeat_ms)
 
     MUTEX_UNLOCK(&scher->myMutex);
 
-    SDBG("modify repeat time %p, repeat %d", timer, repeat_ms);
+    DBG("modify repeat time %p, repeat %d", timer, repeat_ms);
     return NET_SUCCESS;
 }
 
@@ -248,11 +267,11 @@ EpollEvent * createReader(TaskScheduler * scher, SOCKET fd, EventFunc function, 
 
     if (scher->ops->add(scher->context, event)) {
         net_free(event);
-        SERR("add epoll error");
+        ERR("add epoll error");
         return NULL;
     }
 
-    SDBG("create reader event, %p", event);
+    DBG("create reader event, %p", event);
 
     return event;
 }
@@ -265,7 +284,7 @@ void deleteReader(EpollEvent * event)
     if (!scher)
         return;
 
-    SDBG("delete reader event, %p", event);
+    DBG("delete reader event, %p", event);
     scher->ops->del(scher->context, event);
     net_free(event);
 }
@@ -278,7 +297,7 @@ int modifyReader(EpollEvent * event)
     if (!scher)
         return NET_FAIL;
 
-    SDBG("modify reader event %p", event);
+    DBG("modify reader event %p", event);
 
     return scher->ops->mod(scher->context, event);
 }
@@ -320,11 +339,11 @@ TaskScheduler * createTaskScheduler(void)
 
         scher->isRunning = SHECH_RUNNING;
 
-        SDBG("task scheduler started %p", scher);
+        DBG("task scheduler started %p", scher);
     } while (0);
 
     if (!scher->isRunning) {
-        SERR("scheduler init failed");
+        ERR("scheduler init failed");
         destroyTaskScheduler(scher);
         return NULL;
     }
@@ -337,18 +356,20 @@ void destroyTaskScheduler(TaskScheduler * scher)
     assert(scher);
 
     scher->isRunning = SHECH_STOP;
-
+    
     if (scher->workerThread > 0) {
         sendSignal(scher->signalFd);
         JOIN_THREAD(scher->workerThread);
     }
 
     MUTEX_DESTROY(&scher->myMutex);
-
-    if (scher->taskQueue)
-        destroyFifoQueue(scher->taskQueue, TriggerEvent);
     
-    if (scher->timerQueue)
+    if (scher->taskQueue) {
+        _wakeupCond(scher);
+        destroyFifoQueue(scher->taskQueue, TriggerEvent);
+    }
+    
+    if (scher->timerQueue) 
         destroyFifoQueue(scher->timerQueue, TaskTimer);
     
     if (scher->signalEvents) {
@@ -365,9 +386,9 @@ void destroyTaskScheduler(TaskScheduler * scher)
         scher->ops = NULL;
     }
 
-    SDBG("delete scheduler %p", scher);
+    DBG("delete scheduler %p", scher);
 
-    SDBG("delete scheduler successfully"); 
+    DBG("delete scheduler successfully"); 
 
     net_free(scher);
 

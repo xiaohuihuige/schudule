@@ -96,11 +96,18 @@ typedef struct {
     } \
 } while (0)
 
-
 // 等待阻塞条件
 #define COND_WAIT(m, l) do { \
     if (pthread_cond_wait(&(m)->cond, &(l)->mutex) != 0) { \
         perror("Cond signal failed"); \
+        exit(EXIT_FAILURE); \
+    } \
+} while (0)
+
+// 发送全部信号
+#define COND_BROADCAST(m) do { \
+    if (pthread_cond_broadcast((&(m)->cond)) != 0) { \
+        perror("Cond broadcast failed"); \
         exit(EXIT_FAILURE); \
     } \
 } while (0)

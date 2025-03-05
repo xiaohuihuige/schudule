@@ -6,23 +6,9 @@
 
 #define SHECH_RUNNING   1
 #define SHECH_STOP      0
-#define SHECH_DEBUG     0
 
 #define ASYNC_FLAGS     0
 #define SYNC_FLAGS      1 
-
-
-#define SDBG(fmt, args...) \
-    if (SHECH_DEBUG)       \
-    {                      \
-        DBG(fmt, ##args);    \
-    }
-
-#define SERR(fmt, args...) \
-    if (SHECH_DEBUG)       \
-    {                      \
-        ERR(fmt, ##args);    \
-    }
 
 typedef int (*TriggerFunc)(void *arg);
 typedef int (*EventFunc)(int fd, void *arg);
@@ -90,7 +76,6 @@ typedef struct
     FifoQueue *timerQueue;
     pthread_t workerThread;
     Mutex myMutex;
-    Cond condition;
 } TaskScheduler;
 
 TaskScheduler * createTaskScheduler(void);
