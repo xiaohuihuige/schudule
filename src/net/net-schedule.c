@@ -93,9 +93,7 @@ static int _timerEvent(TaskScheduler * scher)
         }
     }
 
-    long long end_time = get_time_ms();
-
-    return end_time - start_time;
+    return get_time_ms() - start_time;
 }
 
 static void *_eventLoop(void *obj)

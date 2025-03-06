@@ -89,13 +89,17 @@ void multi_threading_sync_trigger_task_test()
 
 int main()
 {
-    //LOG("----------start async_trigger_task_test-------");
-    //async_trigger_task_test();
-    //LOG("----------start sync_trigger_task_test-------");
-    //sync_trigger_task_test();
+    LOG("----------start async_trigger_task_test-------");
+    async_trigger_task_test();
+
+    LOG("----------start sync_trigger_task_test-------");
+    sync_trigger_task_test();
+
     LOG("----------start multi_threading_async_trigger_task_test-------");
     multi_threading_async_trigger_task_test();
+
     LOG("----------start multi_threading_sync_trigger_task_test-------");
     multi_threading_sync_trigger_task_test();
+    
     return EXIT_SUCCESS;
 }

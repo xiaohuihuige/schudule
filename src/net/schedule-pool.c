@@ -9,9 +9,13 @@ SchedulePool *threadPoolCreate(int threadCount)
     scherpool->threadCount  = threadCount;
     scherpool->thread_index = 0;
 
-    MUTEX_INIT(&scherpool->myMutex);
-
     scherpool->scher = (TaskScheduler **)malloc(threadCount * sizeof(TaskScheduler *));
+    if (!scherpool->scher) {
+        FREE(scherpool);
+        return NULL;
+    }
+
+    MUTEX_INIT(&scherpool->myMutex);
 
     for (int i = 0; i < threadCount; i++) {
         scherpool->scher[i] = createTaskScheduler();
