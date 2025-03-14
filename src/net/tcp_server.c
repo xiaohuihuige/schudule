@@ -1,5 +1,45 @@
 #include "tcp_server.h"
 
+static void _closeTcpConnection(Seesion *conn)
+{
+    assert(conn);
+
+    if (conn->tcps->func->uinit) 
+        conn->tcps->func->uinit(conn->args);
+    
+    if (conn->ev)
+        deleteReader(conn->ev);
+
+    if (conn->fd > 0)
+        closeTcpSocket(conn->fd);
+
+    return;
+}
+
+static void _closeAllTcpConnection(TcpServer *tcps)
+{
+    assert(tcps);
+    if (!tcps->connects)
+        return;
+
+    FifoQueue *task_node = NULL;
+    FifoQueue *temp_node = NULL;
+    list_for_each_entry_safe(task_node, temp_node, &tcps->connects->list, list)
+    {
+        Seesion *conn = (Seesion *)task_node->task;
+        if (!conn)
+            continue;
+
+        _closeTcpConnection(conn);
+
+        deleteFifoQueueTask(task_node, Seesion);
+    }
+
+    tcps->connects = NULL;
+
+    return;
+}
+
 static int _recvTcpBuffer(int fd, void *args)
 {
     assert(args);
@@ -7,18 +47,91 @@ static int _recvTcpBuffer(int fd, void *args)
     Buffer * buffer = MALLOC(Buffer, sizeof(Buffer) + REVC_MTU);
     int size = Read(fd, buffer->data, REVC_MTU);
     if (size <= 0) {
-       return NET_FAIL; 
+        _closeTcpConnection((Seesion *)args);
+        if (((Seesion *)args)->tcps->connects) {
+            MUTEX_LOCK(&((Seesion *)args)->tcps->myMutex);
+            FindDeleteFifoQueueTask(((Seesion *)args)->tcps->connects, Seesion, (Seesion *)args);
+            MUTEX_UNLOCK(&((Seesion *)args)->tcps->myMutex);
+            FREE(buffer);
+        }
+        return NET_FAIL; 
     }
-    return NET_SUCCESS;
 
+    if (((Seesion *)args)->tcps->func->recv) 
+        ((Seesion *)args)->tcps->func->recv(args, buffer);
+
+    FREE(buffer);
+    return NET_SUCCESS;
 }
 
 static int _createTcpConnection(int fd, void *args)
 {
     assert(args);
 
+    Seesion *conn = CALLOC(1, Seesion);
+    if (!conn) 
+        return NET_FAIL;
    
+    conn->fd = acceptTcpSocket(fd);
+    if (conn->fd <= 0) {
+        FREE(conn);
+        return NET_FAIL;
+    }
+
+    SetNonBlock(conn->fd);
+    SetSendBufSize(conn->fd, 100 * 1024);
+    SetKeepAlive(conn->fd);
+
+    conn->tcps = (TcpServer *)args;
+
+    if (conn->tcps->func->init) {
+        conn->args = conn->tcps->func->init(conn);
+        if (!conn->args) 
+            goto error;
+    }
+
+    conn->ev = createReader(conn->tcps->scher, conn->fd, _recvTcpBuffer, (void *)conn);
+    if (!conn->ev) 
+        goto error;
+
+    LOG("new connection: %d, %p", conn->fd, conn);
+
+    MUTEX_LOCK(&conn->tcps->myMutex);
+    enqueue(conn->tcps->connects, (void *)conn);
+    MUTEX_UNLOCK(&conn->tcps->myMutex);
+
     return NET_SUCCESS;
+
+error:
+    ERR("createReader error %p", conn);
+
+    _closeTcpConnection(conn);
+
+    if (conn->tcps->connects) {
+        MUTEX_LOCK(&conn->tcps->myMutex);
+        FindDeleteFifoQueueTask(conn->tcps, Seesion, conn);
+        MUTEX_UNLOCK(&conn->tcps->myMutex);
+    }
+
+    return NET_FAIL;
+}
+
+void setTcpServerCallBack(TcpServer *tcps, 
+                void *(*init)(void *args), 
+                void (*recv)(void *args, void *buffer), 
+                void (*uinit)(void *args))
+{
+    assert(tcps);
+
+    tcps->func = CALLOC(1, SeesionFunc);
+    if (!tcps->func)
+        return;
+
+    tcps->func->init  = init;
+    tcps->func->recv  = recv;
+    tcps->func->uinit = uinit;
+
+    return;
 }
 
 TcpServer *createTcpServer(const char *ip, int port)
@@ -30,44 +143,69 @@ TcpServer *createTcpServer(const char *ip, int port)
         return NULL;
 
     tcps->port = port;
-    strncpy(tcps->ip, ip, strlen(ip));
-    
-    do {
+    snprintf(tcps->ip, sizeof(tcps->ip), "%s", ip);
 
-        tcps->connects = createFifiQueue();
-        if (!tcps->connects)
-            break;
+    MUTEX_INIT(&tcps->myMutex);
 
-        tcps->fd = CreateTcpSocket();
-        if (tcps->fd <= 0)
-            break;
+    tcps->connects = createFifiQueue();
+    if (!tcps->connects)
+        goto error;
 
-        SetReuseAddr(tcps->fd);
-        SetReusePort(tcps->fd);
-        SetNonBlock(tcps->fd);
-        
-        int ret = bindTcpSocket(tcps->fd, tcps->ip, tcps->port);
-        if (ret <= -1)
-            break;
+    tcps->fd = CreateServer(tcps->ip, tcps->port, 1024);
+    if (tcps->fd <= 0)
+        goto error;
 
-        ret = listenTcpSocket(tcps->fd, 1024);
-        if (ret <= -1)
-            break;
+    tcps->scher = createTaskScheduler();
+    if (!tcps->scher)
+        goto error;
 
-        tcps->scher = createTaskScheduler();
-        if (!tcps->scher)
-            break;
+    tcps->ev = createReader(tcps->scher, tcps->fd, _createTcpConnection, (void *)tcps); 
+    if (!tcps->ev)
+        goto error;
 
-        tcps->ev = createReader(tcps->scher, tcps->fd, _createTcpConnection, (void *)tcps); 
-        if (!tcps->ev)
-            break;
-
-    } while (0);
+    LOG("start server %p, ip %s, port %d", tcps, tcps->ip, tcps->port);
 
     return tcps;
+
+error:
+    ERR("create server failed");
+    destroyTcpServer(tcps);
+    return NULL;
 }
 
 void destroyTcpServer(TcpServer *tcps)
 {
+    assert(tcps);
 
+    MUTEX_LOCK(&tcps->myMutex);
+
+    if (tcps->connects) 
+        _closeAllTcpConnection(tcps);
+
+    if (tcps->ev) {
+        deleteReader(tcps->ev);
+        tcps->ev = NULL;
+    }
+
+    if (tcps->fd > 0) {
+        closeTcpSocket(tcps->fd);
+        tcps->fd = -1;
+    }
+  
+    if (tcps->scher) {
+        destroyTaskScheduler(tcps->scher);
+        tcps->scher = NULL;
+    }
+    
+    MUTEX_UNLOCK(&tcps->myMutex);
+
+    FREE(tcps->func);
+
+    MUTEX_DESTROY(&tcps->myMutex);
+
+    LOG("delete server %p", tcps);
+
+    FREE(tcps);
+
+    return;
 }

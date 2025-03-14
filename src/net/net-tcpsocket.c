@@ -198,3 +198,24 @@ int Fread(FILE *fp, char *data, uint32_t len)
 {
     return fread(data, 1, len, fp);
 }
+
+SOCKET CreateServer(const char *ip, uint16_t port, int backlog)
+{
+    SOCKET fd = CreateTcpSocket();
+    if (fd <= 0)
+        return NET_FAIL;
+
+    SetReuseAddr(fd);
+    SetReusePort(fd);
+    SetNonBlock(fd);
+
+    int ret = bindTcpSocket(fd, ip, port);
+    if (ret <= -1)
+        return NET_FAIL;
+
+    ret = listenTcpSocket(fd, backlog);
+    if (ret <= -1)
+        return NET_FAIL;
+
+    return fd;
+}

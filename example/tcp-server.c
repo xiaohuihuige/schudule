@@ -1,5 +1,5 @@
 #include "net-common.h"
-#include "net-tcp-server.h"
+#include "tcp_server.h"
 
 int rtmp_revc_msg(void *conn)
 {
@@ -9,10 +9,11 @@ int rtmp_revc_msg(void *conn)
 
 int main()
 {
-    server_ptr server = tcp_start_server("0.0.0.0", 1935, NULL, NULL, rtmp_revc_msg, NULL);
+    TcpServer * server = createTcpServer(DEFAULT_IP, 1935);
     while (1)
     {
         sleep(1);
     }
-    tcp_close_all_connection(server);
+    
+    destroyTcpServer(server);
 }

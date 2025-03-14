@@ -25,11 +25,11 @@ static int _triggerEvent(TaskScheduler * scher)
         if (trigger->sync_flags) {
             COND_SIGNAL(&trigger->condition);
         } else {
-            net_free(trigger);
+            FREE(trigger);
         }
     }
 
-    net_free(task_node);
+    FREE(task_node);
 
     return 1;
 }
@@ -148,7 +148,7 @@ long long addTriggerTask(TaskScheduler * scher, TriggerFunc function, void *args
         MUTEX_UNLOCK(&scher->myMutex);
 
         COND_DESTROY(&trigger->condition);
-        net_free(trigger);
+        FREE(trigger);
     }
 
     return task_id;
@@ -264,7 +264,7 @@ EpollEvent * createReader(TaskScheduler * scher, SOCKET fd, EventFunc function, 
     event->scher = (void *)scher;
 
     if (scher->ops->add(scher->context, event)) {
-        net_free(event);
+        FREE(event);
         ERR("add epoll error");
         return NULL;
     }
@@ -284,7 +284,7 @@ void deleteReader(EpollEvent * event)
 
     DBG("delete reader event, %p", event);
     scher->ops->del(scher->context, event);
-    net_free(event);
+    FREE(event);
 }
 
 int modifyReader(EpollEvent * event)
@@ -388,7 +388,7 @@ void destroyTaskScheduler(TaskScheduler * scher)
 
     DBG("delete scheduler successfully"); 
 
-    net_free(scher);
+    FREE(scher);
 
     return;
 }

@@ -4,7 +4,24 @@
 #include "net-common.h"
 #include "net-schedule.h"
 
+typedef struct TcpServer TcpServer;
+
 typedef struct 
+{
+    void *(*init)(void *args);
+    void (*recv)(void *args, void *buffer);
+    void (*uinit)(void *args);
+} SeesionFunc;
+
+typedef struct 
+{
+    SOCKET fd;
+    EpollEvent * ev;
+    void *args;
+    TcpServer *tcps;
+} Seesion;
+
+struct TcpServer 
 {
     SOCKET fd;
     TaskScheduler * scher;
@@ -12,9 +29,14 @@ typedef struct
     char ip[256];
     int port;
     FifoQueue *connects;
-} TcpServer;
+    SeesionFunc *func;
+    Mutex myMutex;
+};
 
 TcpServer *createTcpServer(const char *ip, int port);
-void  destroyTcpServer(TcpServer *tcps);
-
+void destroyTcpServer(TcpServer *tcps);
+void setTcpServerCallBack(TcpServer *tcps, 
+                        void *(*init)(void *args), 
+                        void (*recv)(void *args, void *buffer), 
+                        void (*uinit)(void *args));
 #endif
