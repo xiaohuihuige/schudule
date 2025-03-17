@@ -3,38 +3,33 @@
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
-
-#define SERVER_IP "127.0.0.1"  // 服务器IP地址
-#define SERVER_PORT 1935      // 服务器端口号
+#include "net-tcpsocket.h"
+#include "net-common.h"
 
 int main() {
-    // 创建套接字
-    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd == -1) {
+
+    SOCKET sockfd = CreateTcpSocket();
+    if (sockfd <= -1) {
         perror("socket");
         exit(EXIT_FAILURE);
     }
 
-    // 设置服务器地址结构体
-    struct sockaddr_in server_addr;
-    memset(&server_addr, 0, sizeof(server_addr));
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(SERVER_PORT);
-    inet_pton(AF_INET, SERVER_IP, &server_addr.sin_addr);
-
-    // 连接服务器
-    if (connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
-        perror("connect");
+    if (0 < Connect(sockfd, DEFAULT_IP, SERVER_PORT, 100)) {
         close(sockfd);
+        ERR("Connect error");
         exit(EXIT_FAILURE);
     }
-
+    
     // 发送数据给服务器
     char *message = "Hello, server!";
-    if (send(sockfd, message, strlen(message), 0) == -1) {
-        perror("send");
-        close(sockfd);
-        exit(EXIT_FAILURE);
+
+    for (int i = 0; i < 100000; i++) {
+        if (send(sockfd, message, strlen(message), 0) == -1) {
+            perror("send");
+            ERR("send error");
+            close(sockfd);
+            exit(EXIT_FAILURE);
+        }
     }
 
     // 接收服务器的响应
@@ -43,6 +38,7 @@ int main() {
     if (num_bytes == -1) {
         perror("recv");
         close(sockfd);
+        ERR("recv error");
         exit(EXIT_FAILURE);
     }
 

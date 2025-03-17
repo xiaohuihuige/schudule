@@ -4,7 +4,7 @@ static void _closeTcpConnection(Seesion *conn)
 {
     assert(conn);
 
-    if (conn->tcps->func->uinit) 
+    if (conn->tcps->func && conn->tcps->func->uinit) 
         conn->tcps->func->uinit(conn->args);
     
     if (conn->ev)
@@ -12,6 +12,8 @@ static void _closeTcpConnection(Seesion *conn)
 
     if (conn->fd > 0)
         closeTcpSocket(conn->fd);
+
+    LOG("close tcp connection %d, %p", conn->fd, conn);
 
     return;
 }
@@ -44,23 +46,28 @@ static int _recvTcpBuffer(int fd, void *args)
 {
     assert(args);
 
+    Seesion *conn = (Seesion *)args;
+
     Buffer * buffer = MALLOC(Buffer, sizeof(Buffer) + REVC_MTU);
     int size = Read(fd, buffer->data, REVC_MTU);
     if (size <= 0) {
-        _closeTcpConnection((Seesion *)args);
-        if (((Seesion *)args)->tcps->connects) {
-            MUTEX_LOCK(&((Seesion *)args)->tcps->myMutex);
-            FindDeleteFifoQueueTask(((Seesion *)args)->tcps->connects, Seesion, (Seesion *)args);
-            MUTEX_UNLOCK(&((Seesion *)args)->tcps->myMutex);
+        _closeTcpConnection(conn);
+        if (conn->tcps->connects) {
+            MUTEX_LOCK(&conn->tcps->myMutex);
+            FindDeleteFifoQueueTask(conn->tcps->connects, Seesion, (Seesion *)args);
+            MUTEX_UNLOCK(&conn->tcps->myMutex);
             FREE(buffer);
         }
         return NET_FAIL; 
     }
 
-    if (((Seesion *)args)->tcps->func->recv) 
-        ((Seesion *)args)->tcps->func->recv(args, buffer);
+    buffer->length = size;
+
+    if (conn->tcps->func && conn->tcps->func->recv) 
+        conn->tcps->func->recv(args, buffer);
 
     FREE(buffer);
+
     return NET_SUCCESS;
 }
 
@@ -79,12 +86,12 @@ static int _createTcpConnection(int fd, void *args)
     }
 
     SetNonBlock(conn->fd);
-    SetSendBufSize(conn->fd, 100 * 1024);
+    SetSendBufSize(conn->fd, 1024 * 1024);
     SetKeepAlive(conn->fd);
 
     conn->tcps = (TcpServer *)args;
 
-    if (conn->tcps->func->init) {
+    if (conn->tcps->func && conn->tcps->func->init) {
         conn->args = conn->tcps->func->init(conn);
         if (!conn->args) 
             goto error;
@@ -103,7 +110,7 @@ static int _createTcpConnection(int fd, void *args)
     return NET_SUCCESS;
 
 error:
-    ERR("createReader error %p", conn);
+    ERR("createReader fail %p", conn);
 
     _closeTcpConnection(conn);
 
@@ -112,6 +119,8 @@ error:
         FindDeleteFifoQueueTask(conn->tcps, Seesion, conn);
         MUTEX_UNLOCK(&conn->tcps->myMutex);
     }
+
+    FREE(conn);
 
     return NET_FAIL;
 }
@@ -122,6 +131,8 @@ void setTcpServerCallBack(TcpServer *tcps,
                 void (*uinit)(void *args))
 {
     assert(tcps);
+
+    FREE(tcps->func);
 
     tcps->func = CALLOC(1, SeesionFunc);
     if (!tcps->func)
