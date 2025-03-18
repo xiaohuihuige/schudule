@@ -5,10 +5,12 @@ IPCS_DIR    = $(CURRENT_DIR)/src/ipcs
 NET_DIR     = $(CURRENT_DIR)/src/net
 UTIL_DIR    = $(CURRENT_DIR)/src/util
 BIN_DIR     = $(OUT_DIR)/bin
+INCLUDE_DIR = $(OUT_DIR)/include
+LIB_DIR     = $(OUT_DIR)/lib
 SRC_DIR     = $(CURRENT_DIR)/src
 
-STATIC_NAME  = $(OUT_DIR)/libmylib.a
-DYNAMIC_NAME = $(OUT_DIR)/libmylib.so
+STATIC_NAME  = $(LIB_DIR)/libschedule.a
+DYNAMIC_NAME = $(LIB_DIR)/libschedule.so
 
 OBJ_FILE = $(wildcard $(OBJ_DIR)/*.o)
 
@@ -30,13 +32,28 @@ endif
 ifeq ("$(wildcard $(BIN_DIR))","")
 	mkdir $(BIN_DIR)
 endif
-
+ifeq ("$(wildcard $(INCLUDE_DIR))","")
+	mkdir $(INCLUDE_DIR)
+endif
+ifeq ("$(wildcard $(LIB_DIR))","")
+	mkdir $(LIB_DIR)
+endif
 
 $(BIN_DIR)/%: example/%.c | TEMP_PATH
 	$(CC) -o $@ $^ $(OBJ_FILE) $(CFLAGS)
 
 subdir:
 	$(MAKE) -C $(SRC_DIR) CFLAGS="$(CFLAGS)" OBJ_DIR=$(OBJ_DIR) IPCS_DIR=$(IPCS_DIR) NET_DIR=$(NET_DIR) STATIC_NAME=$(STATIC_NAME) UTIL_DIR=$(UTIL_DIR) DYNAMIC_NAME=$(DYNAMIC_NAME) 
+	find $(SRC_DIR) -name "*.h" -exec cp {} $(INCLUDE_DIR) \;
+
 clean:
 	-$(RM) -rf $(OUT_DIR) 
+	
+install:
+	-cp $(DYNAMIC_NAME)  /usr/local/lib/libschedule.so
+	-cp $(BIN_DIR)/*      /usr/local/bin/
+	-cp $(INCLUDE_DIR)/*  /usr/local/include
+	-ldconfig
+
+
 
