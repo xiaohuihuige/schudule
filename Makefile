@@ -50,9 +50,12 @@ clean:
 	-$(RM) -rf $(OUT_DIR) 
 	
 install:
+ifeq ("$(wildcard "/usr/local/include/schedule")","")
+	mkdir /usr/local/include/schedule
+endif
 	-cp $(DYNAMIC_NAME)  /usr/local/lib/libschedule.so
 	-cp $(BIN_DIR)/*      /usr/local/bin/
-	-cp $(INCLUDE_DIR)/*  /usr/local/include
+	-cp $(INCLUDE_DIR)/*  /usr/local/include/schedule/
 	-ldconfig
 
 
