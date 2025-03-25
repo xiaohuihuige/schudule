@@ -10,8 +10,8 @@ typedef struct Seesion   Seesion;
 typedef struct 
 {
     void *(*init)(Seesion *conn);
-    void (*recv)(Seesion *conn, Buffer *buffer);
-    void (*uinit)(Seesion *conn);
+    void (*recv)(void *seesion, Buffer *buffer);
+    void (*uinit)(void *seesion);
 } SeesionFunc;
 
 struct Seesion
@@ -38,6 +38,6 @@ TcpServer *createTcpServer(const char *ip, int port);
 void destroyTcpServer(TcpServer *tcps);
 void setTcpServerCallBack(TcpServer *tcps, 
                         void *(*init)(Seesion *conn), 
-                        void (*recv)(Seesion *conn, Buffer *buffer), 
-                        void (*uinit)(Seesion *conn));
+                        void (*recv)(void *seesion, Buffer *buffer), 
+                        void (*uinit)(void *seesion));
 #endif

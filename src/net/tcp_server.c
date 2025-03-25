@@ -64,7 +64,7 @@ static int _recvTcpBuffer(int fd, void *args)
     buffer->length = size;
 
     if (conn->tcps->func && conn->tcps->func->recv) 
-        conn->tcps->func->recv(args, buffer);
+        conn->tcps->func->recv(conn->args, buffer);
 
     FREE(buffer);
 
@@ -127,8 +127,8 @@ error:
 
 void setTcpServerCallBack(TcpServer *tcps, 
                 void *(*init)(Seesion *conn), 
-                void (*recv)(Seesion *conn, Buffer *buffer), 
-                void (*uinit)(Seesion *conn))
+                void (*recv)(void *seesion, Buffer *buffer), 
+                void (*uinit)(void *seesion))
 {
     assert(tcps);
 
