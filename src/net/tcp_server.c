@@ -126,9 +126,9 @@ error:
 }
 
 void setTcpServerCallBack(TcpServer *tcps, 
-                void *(*init)(void *args), 
-                void (*recv)(void *args, void *buffer), 
-                void (*uinit)(void *args))
+                void *(*init)(Seesion *conn), 
+                void (*recv)(Seesion *conn, Buffer *buffer), 
+                void (*uinit)(Seesion *conn))
 {
     assert(tcps);
 

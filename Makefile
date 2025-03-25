@@ -50,7 +50,7 @@ clean:
 	-$(RM) -rf $(OUT_DIR) 
 	
 install:
-ifeq ("$(wildcard "/usr/local/include/schedule")","")
+ifeq ("$(wildcard /usr/local/include/schedule)","")
 	mkdir /usr/local/include/schedule
 endif
 	-cp $(DYNAMIC_NAME)  /usr/local/lib/libschedule.so

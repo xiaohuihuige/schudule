@@ -3,7 +3,7 @@
 
 #include "net-common.h"
 
-#define DEFAULT_IP "127.0.0.1"// 服务器IP地址
+#define DEFAULT_IP "0.0.0.0"// 服务器IP地址
 #define SERVER_PORT 1935      // 服务器端口号
 typedef int SOCKET;
 

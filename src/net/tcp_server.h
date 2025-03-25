@@ -5,21 +5,22 @@
 #include "net-schedule.h"
 
 typedef struct TcpServer TcpServer;
+typedef struct Seesion   Seesion;
 
 typedef struct 
 {
-    void *(*init)(void *args);
-    void (*recv)(void *args, void *buffer);
-    void (*uinit)(void *args);
+    void *(*init)(Seesion *conn);
+    void (*recv)(Seesion *conn, Buffer *buffer);
+    void (*uinit)(Seesion *conn);
 } SeesionFunc;
 
-typedef struct 
+struct Seesion
 {
     SOCKET fd;
     EpollEvent * ev;
     void *args;
     TcpServer *tcps;
-} Seesion;
+};
 
 struct TcpServer 
 {
@@ -36,7 +37,7 @@ struct TcpServer
 TcpServer *createTcpServer(const char *ip, int port);
 void destroyTcpServer(TcpServer *tcps);
 void setTcpServerCallBack(TcpServer *tcps, 
-                        void *(*init)(void *args), 
-                        void (*recv)(void *args, void *buffer), 
-                        void (*uinit)(void *args));
+                        void *(*init)(Seesion *conn), 
+                        void (*recv)(Seesion *conn, Buffer *buffer), 
+                        void (*uinit)(Seesion *conn));
 #endif

@@ -1,12 +1,12 @@
 #include "net-common.h"
 #include "tcp_server.h"
 
-void rtmp_revc_msg(void *args, void *buffer)
+void rtmp_revc_msg(Seesion *conn, Buffer *buffer)
 {
-    LOG("recv size:%d, %p, %s", ((Buffer *)buffer)->length, args, ((Buffer *)buffer)->data);
+    LOG("recv size:%d, %p, %s", buffer->length, conn, buffer->data);
 
     char *message = "Hello, server!";
-    send(((Seesion *)args)->fd, message, strlen(message), 0);
+    send(conn->fd, message, strlen(message), 0);
 }
 
 int main()
