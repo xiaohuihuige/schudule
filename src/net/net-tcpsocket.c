@@ -1,5 +1,36 @@
 #include "net-tcpsocket.h"
 
+int getHostAddrs(const char *card, char *get_ip, size_t size)
+{
+    if (!card || !get_ip)
+        return EXIT_FAILURE;
+
+    struct ifaddrs *ifaddr, *ifa;
+    char ip[INET_ADDRSTRLEN];
+
+    // 获取网络接口地址
+    if (getifaddrs(&ifaddr) == -1) {
+        perror("getifaddrs");
+        return EXIT_FAILURE;
+    }
+
+    // 遍历所有接口
+    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) { // 只处理IPv4地址
+        if (ifa->ifa_addr && ifa->ifa_addr->sa_family == AF_INET) {
+            if (inet_ntop(AF_INET, &((struct sockaddr_in *)ifa->ifa_addr)->sin_addr, ip, sizeof(ip)) != NULL) {
+                if (strcmp(ifa->ifa_name, card) == 0) {
+                    snprintf(get_ip, size, "%s", ip); 
+                    break;
+                }
+            } else {
+                perror("inet_ntop");
+            }
+        }
+    }
+    freeifaddrs(ifaddr);
+    return EXIT_SUCCESS;
+}
+
 void SetBlock(SOCKET fd, int write_timeout)
 {
     int flags = fcntl(fd, F_GETFL, 0);

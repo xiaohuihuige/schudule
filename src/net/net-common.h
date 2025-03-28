@@ -8,6 +8,7 @@ extern "C" {
 #define NET_SUCCESS 0
 #define NET_FAIL    (-1)
 
+#include <ifaddrs.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

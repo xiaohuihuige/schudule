@@ -5,8 +5,10 @@
 
 #define DEFAULT_IP "0.0.0.0"// 服务器IP地址
 #define SERVER_PORT 1935      // 服务器端口号
+#define NETWORK_CARD "ens33"
 typedef int SOCKET;
 
+int getHostAddrs(const char *card, char *get_ip, size_t size);
 void SetReuseAddr(SOCKET sockfd);
 void SetReusePort(SOCKET sockfd);
 void SetNonBlock(SOCKET fd);
