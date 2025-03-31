@@ -3,6 +3,7 @@
 
 #include "net-common.h"
 #include "net-schedule.h"
+#include "buffer.h"
 
 typedef struct TcpServer TcpServer;
 typedef struct Seesion   Seesion;

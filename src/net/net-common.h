@@ -184,12 +184,6 @@ typedef struct {
     char data[];               // 可变长度数组，用于存储数据
 } FrameBuffer;
 
-typedef struct 
-{
-    uint32_t length;
-    char data[]; 
-} Buffer;
-
 #ifdef __cplusplus
 }
 #endif
