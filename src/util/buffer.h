@@ -5,6 +5,7 @@
 
 typedef struct
 {
+	uint32_t index;
     uint32_t length;
     uint8_t  data[];
 } Buffer;
@@ -17,6 +18,7 @@ static inline Buffer *createBuffer(size_t size)
 		return NULL;
 	}
 
+	buffer->index  = 0;
 	buffer->length = size;
 
 	return buffer;

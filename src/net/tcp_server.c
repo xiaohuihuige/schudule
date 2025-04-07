@@ -48,7 +48,7 @@ static int _recvTcpBuffer(int fd, void *args)
 
     Seesion *conn = (Seesion *)args;
 
-    Buffer * buffer = MALLOC(Buffer, sizeof(Buffer) + REVC_MTU);
+    Buffer * buffer = createBuffer(REVC_MTU);
     int size = Read(fd, (char *)buffer->data, REVC_MTU);
     if (size <= 0) {
         _closeTcpConnection(conn);
