@@ -51,12 +51,12 @@ clean:
 	
 install:
 ifeq ("$(wildcard /usr/local/include/schedule)","")
-	mkdir /usr/local/include/schedule
+	sudo mkdir /usr/local/include/schedule
 endif
-	-cp $(DYNAMIC_NAME)  /usr/local/lib/libschedule.so
-	-cp $(BIN_DIR)/*      /usr/local/bin/
-	-cp $(INCLUDE_DIR)/*  /usr/local/include/schedule/
-	-ldconfig
+	-sudo cp $(DYNAMIC_NAME)  /usr/local/lib/libschedule.so
+	-sudo cp $(BIN_DIR)/*      /usr/local/bin/
+	-sudo cp $(INCLUDE_DIR)/*  /usr/local/include/schedule/
+	-sudo ldconfig
 
 
 
