@@ -5,6 +5,8 @@
 
 typedef struct
 {
+	uint8_t frame_type;                 // 帧类型
+    unsigned long long timestamp;       // 时间戳
 	uint32_t index;
     uint32_t length;
     uint8_t  data[];
@@ -20,6 +22,28 @@ static inline Buffer *createBuffer(size_t size)
 
 	buffer->index  = 0;
 	buffer->length = size;
+
+	buffer->timestamp  = 0;
+	buffer->frame_type = 0;
+
+	return buffer;
+}
+
+static inline Buffer *createFrameBuffer(uint8_t *frame, size_t frame_len, uint8_t frame_type, unsigned long long timestamp)
+{
+	Buffer * buffer = MALLOC(Buffer, sizeof(Buffer) + frame_len);
+	if (!buffer) {
+		ERR("malloc error");
+		return NULL;
+	}
+
+	buffer->index  = 0;
+	buffer->length = frame_len;
+
+	buffer->timestamp  = timestamp;
+	buffer->frame_type = frame_type;
+
+	memcpy(buffer->data, frame, frame_len);
 
 	return buffer;
 }

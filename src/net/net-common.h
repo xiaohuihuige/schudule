@@ -177,13 +177,6 @@ typedef struct {
         ptr; \
     })
 
-typedef struct {
-    int frame_type;            // 帧类型
-    long long timestamp;       // 时间戳
-    uint32_t   length;
-    char data[];               // 可变长度数组，用于存储数据
-} FrameBuffer;
-
 #ifdef __cplusplus
 }
 #endif
