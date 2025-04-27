@@ -185,6 +185,29 @@ int GetPeerAddr(SOCKET sockfd, struct sockaddr_in *addr)
     return getpeername(sockfd, (struct sockaddr *)addr, &addrlen);
 }
 
+int errorReSend(SOCKET sockfd)
+{
+    if (errno == EAGAIN || errno == EWOULDBLOCK) {
+        // 资源暂时不可用，使用 select() 等待可写
+        fd_set write_fds;
+        FD_ZERO(&write_fds);
+        FD_SET(sockfd, &write_fds);
+
+        struct timeval timeout;
+        timeout.tv_sec = 1; // 1秒超时
+        timeout.tv_usec = 0;
+
+        int result = select(sockfd + 1, NULL, &write_fds, NULL, &timeout);
+        if (result > 0)
+            return NET_SUCCESS;
+
+        ERR("select() failed or timeout occurred...");
+
+        return NET_FAIL;
+    }
+    return NET_SUCCESS;
+}
+
 int Connect(SOCKET sockfd, char *ip, uint16_t port, int timeout)
 {
 	int is_connected = 0;

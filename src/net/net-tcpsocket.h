@@ -36,5 +36,6 @@ int Read(SOCKET sockfd, char *data, uint32_t len);
 int Fread(FILE *fp, char *data, uint32_t len);
 
 SOCKET CreateServer(const char *ip, uint16_t port, int backlog);
+int errorReSend(SOCKET sockfd);
 
 #endif // !__TCP_SOCKET_H__
