@@ -57,7 +57,7 @@ void SetNoDelay(SOCKET sockfd)
 void SetReuseAddr(SOCKET sockfd)
 {
     int on = 1;
-    setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&on, sizeof on);
+    setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&on, sizeof(on));
 }
 
 void SetReusePort(SOCKET sockfd)

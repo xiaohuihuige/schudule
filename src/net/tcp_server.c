@@ -145,6 +145,16 @@ void setTcpServerCallBack(TcpServer *tcps,
     return;
 }
 
+void setParentClassServer(TcpServer *tcps, void *parent)
+{
+    if (!tcps || !parent)
+        return;
+
+    FREE(tcps->parent);
+
+    tcps->parent = parent;
+}
+
 TcpServer *createTcpServer(const char *ip, int port)
 {
     assert(ip);

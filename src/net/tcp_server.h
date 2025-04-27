@@ -33,6 +33,7 @@ struct TcpServer
     FifoQueue *connects;
     SeesionFunc *func;
     Mutex myMutex;
+    void *parent;
 };
 
 TcpServer *createTcpServer(const char *ip, int port);
@@ -40,5 +41,7 @@ void destroyTcpServer(TcpServer *tcps);
 void setTcpServerCallBack(TcpServer *tcps, 
                         void *(*init)(Seesion *conn), 
                         void (*recv)(void *seesion, Buffer *buffer), 
-                        void (*uinit)(void *seesion));
+                        void (*uinit)(void *seesion));                       
+void setParentClassServer(TcpServer *tcps, void *parent);
+
 #endif
