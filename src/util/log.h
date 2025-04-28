@@ -22,5 +22,17 @@
 #define LOG(fmt, ...) LOG_LEVEL(RED_COLOR2, fmt, ##__VA_ARGS__)
 #define DBG(fmt, ...) LOG_LEVEL(GREEN_COLOR, fmt, ##__VA_ARGS__)
 
+static inline void printfChar(uint8_t *data, int len)
+{
+    LOG("byte len %d", len);
+    for (int i = 0; i < len; i++) {
+        fprintf(stderr, "%02x ", data[i]);
+        if ((i + 1) % 8 == 0 && i != 0)
+            fprintf(stderr, "    ");
 
+        if ((i+1) % 16 == 0 && i != 0)
+            fprintf(stderr, " [%d]\n", i + 1);
+    }
+    fprintf(stderr, "\n");
+}
 #endif // !__LOG_H__
