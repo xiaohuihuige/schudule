@@ -163,6 +163,8 @@ static int epoll_dispatch(void *ctx, int timeout)
 
         if (what & (EPOLLHUP | EPOLLERR))
         {
+            if (handle->function)
+                    handle->function(handle->evfd, handle->args);
         }
         else
         {

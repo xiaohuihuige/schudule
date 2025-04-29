@@ -42,6 +42,16 @@ static void _closeAllTcpConnection(TcpServer *tcps)
     return;
 }
 
+static void _deleteTCPConnect(Seesion *conn)
+{
+    TcpServer *tcps = conn->tcps;
+    if (tcps->connects) {
+        MUTEX_LOCK(&tcps->myMutex);
+        FindDeleteFifoQueueTask(tcps->connects, Seesion, conn);
+        MUTEX_UNLOCK(&tcps->myMutex);
+    }
+}
+
 static int _recvTcpBuffer(int fd, void *args)
 {
     assert(args);
@@ -49,19 +59,13 @@ static int _recvTcpBuffer(int fd, void *args)
     Seesion *conn = (Seesion *)args;
 
     Buffer * buffer = createBuffer(REVC_MTU);
-    int size = Read(fd, (char *)buffer->data, REVC_MTU);
-    if (size <= 0) {
+    buffer->length = Read(fd, (char *)buffer->data, REVC_MTU);
+    if (buffer->length <= 0) {
         _closeTcpConnection(conn);
-        if (conn->tcps->connects) {
-            MUTEX_LOCK(&conn->tcps->myMutex);
-            FindDeleteFifoQueueTask(conn->tcps->connects, Seesion, (Seesion *)args);
-            MUTEX_UNLOCK(&conn->tcps->myMutex);
-            FREE(buffer);
-        }
+        _deleteTCPConnect(conn);
+        FREE(buffer);
         return NET_FAIL; 
     }
-
-    buffer->length = size;
 
     if (conn->tcps->func && conn->tcps->func->recv) 
         conn->tcps->func->recv(conn->args, buffer);
@@ -113,12 +117,7 @@ error:
     ERR("createReader fail %p", conn);
 
     _closeTcpConnection(conn);
-
-    if (conn->tcps->connects) {
-        MUTEX_LOCK(&conn->tcps->myMutex);
-        FindDeleteFifoQueueTask(conn->tcps, Seesion, conn);
-        MUTEX_UNLOCK(&conn->tcps->myMutex);
-    }
+    _deleteTCPConnect(conn);
 
     FREE(conn);
 
