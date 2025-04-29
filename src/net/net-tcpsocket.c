@@ -1,9 +1,14 @@
 #include "net-tcpsocket.h"
 #include "timestamp.h"
+#include <stdio.h>
+#include <ifaddrs.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
-int getHostAddrs(const char *card, char *get_ip, size_t size)
+
+int getHostAddrs(char *get_ip, size_t size)
 {
-    if (!card || !get_ip)
+    if (!get_ip)
         return EXIT_FAILURE;
 
     struct ifaddrs *ifaddr, *ifa;
@@ -19,8 +24,9 @@ int getHostAddrs(const char *card, char *get_ip, size_t size)
     for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) { // 只处理IPv4地址
         if (ifa->ifa_addr && ifa->ifa_addr->sa_family == AF_INET) {
             if (inet_ntop(AF_INET, &((struct sockaddr_in *)ifa->ifa_addr)->sin_addr, ip, sizeof(ip)) != NULL) {
-                if (strcmp(ifa->ifa_name, card) == 0) {
-                    snprintf(get_ip, size, "%s", ip); 
+                if (strcmp(ip, "127.0.0.1") != 0)
+                { 
+                    snprintf(get_ip, size, "%s", ip);
                     break;
                 }
             } else {
