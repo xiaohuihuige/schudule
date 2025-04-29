@@ -37,7 +37,7 @@ static void _closeAllTcpConnection(TcpServer *tcps)
         deleteFifoQueueTask(task_node, Seesion);
     }
 
-    tcps->connects = NULL;
+    FREE(tcps->connects);
 
     return;
 }
