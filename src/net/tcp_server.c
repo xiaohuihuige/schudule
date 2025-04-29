@@ -91,10 +91,6 @@ static int _createTcpConnection(int fd, void *args)
         return NET_FAIL;
     }
 
-    SetNonBlock(conn->fd);
-    SetSendBufSize(conn->fd, 1024 * 1024);
-    SetKeepAlive(conn->fd);
-
     conn->tcps = (TcpServer *)args;
 
     if (conn->tcps->func && conn->tcps->func->init) {
@@ -177,7 +173,7 @@ TcpServer *createTcpServer(const char *ip, int port)
     tcps->fd = CreateServer(tcps->ip, tcps->port, 1024);
     if (tcps->fd <= 0)
         goto error;
-
+    
     tcps->scher = createTaskScheduler();
     if (!tcps->scher)
         goto error;

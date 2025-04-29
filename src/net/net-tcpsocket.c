@@ -1,4 +1,5 @@
 #include "net-tcpsocket.h"
+#include "timestamp.h"
 
 int getHostAddrs(const char *card, char *get_ip, size_t size)
 {
@@ -85,7 +86,23 @@ void SetRecvBufSize(SOCKET sockfd, int size)
 
 void SetSendBufSize(SOCKET sockfd, int size)
 {
-    setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (char *)&size, sizeof(size));
+    int send_size = size;
+
+    if (setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (char *)&send_size, sizeof(send_size)) < 0)
+        ERR("set send buffer fail  fd %d, %d", sockfd, send_size);
+}
+
+int getSendBufSize(SOCKET sockfd)
+{
+    int send_size = 0;
+    // 验证设置
+    socklen_t optlen = sizeof(send_size);
+    if (getsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (char *)&send_size, &optlen) < 0) 
+        ERR("get send buffer size fail fd %d",sockfd);
+    
+    //LOG("fd %d, send buffer size is %d", sockfd, send_size);
+
+    return send_size;
 }
 
 SOCKET CreateTcpSocket()
@@ -262,6 +279,12 @@ SOCKET CreateServer(const char *ip, uint16_t port, int backlog)
     SetReuseAddr(fd);
     SetReusePort(fd);
     SetNonBlock(fd);
+  
+    SetSendBufSize(fd, 10 * 1024 * 1024);
+
+    LOG("tcp set send buffer size is %d", getSendBufSize(fd));
+
+    SetKeepAlive(fd);
 
     int ret = bindTcpSocket(fd, ip, port);
     if (ret <= -1)
@@ -272,4 +295,46 @@ SOCKET CreateServer(const char *ip, uint16_t port, int backlog)
         return NET_FAIL;
 
     return fd;
+}
+
+
+int Send(SOCKET sockfd, uint8_t *data, int len, int time)
+{
+    ssize_t bytes_sent;
+    int length = len;
+    while (length > 0) {
+        fd_set write_fds;
+        FD_ZERO(&write_fds);
+        FD_SET(sockfd, &write_fds);
+
+        struct timeval timeout;
+        timeout.tv_sec = time; // 1秒超时
+        timeout.tv_usec = 0;
+
+        int result = select(sockfd + 1, NULL, &write_fds, NULL, &timeout); 
+        if (result > 0)
+        {
+            bytes_sent = send(sockfd, data, length, MSG_NOSIGNAL);
+            if (bytes_sent < 0) {
+                if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                        // 发送缓冲区满，继续循环
+                    continue;
+                } else {
+                    ERR("send() failed: %s", strerror(errno));
+                    break;
+                }
+            }
+            data += bytes_sent;
+            length -= bytes_sent;
+        } else if (result == 0) {
+            // 超时处理
+            ERR("Send timeout");
+            break;
+        } else {
+            ERR("select() failed: %s", strerror(errno));
+            break;
+        }
+    }
+
+    return length == 0 ? len : length;
 }

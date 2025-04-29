@@ -17,6 +17,7 @@ void SetNoDelay(SOCKET sockfd);
 void SetKeepAlive(SOCKET sockfd);
 void SetRecvBufSize(SOCKET sockfd, int size);
 void SetSendBufSize(SOCKET sockfd, int size);
+int getSendBufSize(SOCKET sockfd);
 
 SOCKET CreateTcpSocket();
 int bindTcpSocket(SOCKET sockfd, const char *ip, uint16_t port);
@@ -37,5 +38,6 @@ int Fread(FILE *fp, char *data, uint32_t len);
 
 SOCKET CreateServer(const char *ip, uint16_t port, int backlog);
 int errorReSend(SOCKET sockfd);
+int Send(SOCKET sockfd, uint8_t *data, int len, int time);
 
 #endif // !__TCP_SOCKET_H__
