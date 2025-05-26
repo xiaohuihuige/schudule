@@ -34,6 +34,20 @@ typedef struct
         }                                                                                       \
     } while (0);
 
+
+#define destroyFifoQueueTask(head, type)                                                        \
+    do {                                                                                        \
+        if (head) {                                                                             \
+            FifoQueue *task_pos = NULL;                                                         \
+            FifoQueue *temp_pos = NULL;                                                         \
+            list_for_each_entry_safe(task_pos, temp_pos, &((FifoQueue *)head)->list, list)      \
+            {                                                                                   \
+                list_del(&del_pos->list);                                                       \
+                FREE(task_pos);                                                                 \
+            }                                                                                   \
+        }                                                                                       \
+    } while (0);
+
 #define findFifoQueueTask(head, head_pos, type, find_task)                  \
     do {                                                                    \
         if (head) {                                                         \
