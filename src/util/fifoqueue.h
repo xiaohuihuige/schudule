@@ -43,7 +43,7 @@ typedef struct
             FifoQueue *temp_pos = NULL;                                                         \
             list_for_each_entry_safe(task_pos, temp_pos, &((FifoQueue *)head)->list, list)      \
             {                                                                                   \
-                list_del(&del_pos->list);                                                       \
+                list_del(&task_pos->list);                                                       \
                 FREE(task_pos);                                                                 \
             }                                                                                   \
         }                                                                                       \
