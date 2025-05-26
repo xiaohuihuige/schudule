@@ -31,6 +31,7 @@ typedef struct
             {                                                                                   \
                 deleteFifoQueueTask(task_pos, type);                                            \
             }                                                                                   \
+            FREE(head);                                                                         \
         }                                                                                       \
     } while (0);
 
