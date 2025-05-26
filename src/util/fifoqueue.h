@@ -9,47 +9,52 @@ typedef struct
     struct list_head list;
 } FifoQueue;
 
-#define deleteFifoQueueTask(head, type) \
-    {                                 \
-        list_del(&head->list);        \
-        if ((type *)head->task)       \
-        {                             \
-            net_free(head->task)      \
-        }                             \
-        net_free(head)                \
-    }
+#define deleteFifoQueueTask(head, type)     \
+    do {                                    \
+        if (head) {                         \
+            list_del(&head->list);          \
+            if ((type *)head->task)         \
+            {                               \
+                net_free(head->task)        \
+            }                               \
+        }                                   \
+    } while (0);
 
-#define destroyFifoQueue(head, type)                             \
-    {                                                                   \
-        FifoQueue *task_pos = NULL;                                     \
-        FifoQueue *temp_pos = NULL;                                      \
-        list_for_each_entry_safe(task_pos, temp_pos, &((FifoQueue *)head)->list, list) \
-        {                                                               \
-            deleteFifoQueueTask(task_pos, type);                          \
-        }                                                               \
-        net_free(head)                                                  \
-    }
+#define destroyFifoQueue(head, type)                                                        \
+    do {                                                                                    \
+        if (head) {                                                                         \
+            FifoQueue *task_pos = NULL;                                                         \
+            FifoQueue *temp_pos = NULL;                                                         \
+            list_for_each_entry_safe(task_pos, temp_pos, &((FifoQueue *)head)->list, list)      \
+            {                                                                                   \
+                deleteFifoQueueTask(task_pos, type);                                            \
+            }                                                                                   \
+        }                                                                                       \
+    } while (0);
 
-#define findFifoQueueTask(head, head_pos, type, find_task)             \
-    {                                                                   \
-        FifoQueue *temp_pos = NULL;                                     \
-        list_for_each_entry_safe(head_pos, temp_pos, &((FifoQueue *)head)->list, list) \
-        {                                                               \
-            if (head_pos->task == find_task)                            \
-                break;                                                  \
-        }                                                               \
-    }
+#define findFifoQueueTask(head, head_pos, type, find_task)                  \
+    do {                                                                    \
+        if (head) {                                                         \
+            FifoQueue *temp_pos = NULL;                                     \
+            list_for_each_entry_safe(head_pos, temp_pos, &((FifoQueue *)head)->list, list) \
+            {                                                               \
+                if (head_pos->task == find_task)                            \
+                    break;                                                  \
+            }                                                               \
+        }                                                                   \
+    } while (0);
 
-#define FindDeleteFifoQueueTask(head, type, del_task)       \
-    {                                                      \
-        FifoQueue *del_pos = NULL;                         \
-        findFifoQueueTask(head, del_pos, type, del_task); \
-        if (del_pos && del_pos->task == del_task)          \
-        {                                                  \
-            deleteFifoQueueTask(del_pos, type)               \
-        }                                                  \
-    }
-
+#define FindDeleteFifoQueueTask(head, type, del_task)                       \
+    do {                                                                    \
+        if (head) {                                                         \
+            FifoQueue *del_pos = NULL;                                      \
+            findFifoQueueTask(head, del_pos, type, del_task);               \
+            if (del_pos && del_pos->task == del_task)                       \
+            {                                                               \
+                deleteFifoQueueTask(del_pos, type)                          \
+            }                                                               \
+        }                                                                   \
+    } while (0);
 
 static inline FifoQueue *createFifiQueue(void)
 {

@@ -35,6 +35,7 @@ static void _closeAllTcpConnection(TcpServer *tcps)
         _closeTcpConnection(conn);
 
         deleteFifoQueueTask(task_node, Seesion);
+        FREE(task_node);
     }
 
     FREE(tcps->connects);
@@ -48,6 +49,7 @@ static void _deleteTCPConnect(Seesion *conn)
     if (tcps->connects) {
         MUTEX_LOCK(&tcps->myMutex);
         FindDeleteFifoQueueTask(tcps->connects, Seesion, conn);
+        FREE(conn);
         MUTEX_UNLOCK(&tcps->myMutex);
     }
 }
