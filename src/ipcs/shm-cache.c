@@ -42,7 +42,6 @@ void shm_cache_unint(shm_cache_ptr cache)
         pthread_mutex_destroy(&cache->lock);
         net_free(cache->memory);
         destroyFifoQueue(cache->record_list, cache_record);
-        FREE(cache->record_list);
         net_free(cache);
     }
 }

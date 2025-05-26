@@ -15,10 +15,12 @@ typedef struct
             list_del(&head->list);          \
             if ((type *)head->task)         \
             {                               \
-                net_free(head->task)        \
+                net_free(head->task);       \
             }                               \
+            FREE(head);                      \
         }                                   \
     } while (0);
+
 
 #define destroyFifoQueue(head, type)                                                        \
     do {                                                                                    \
@@ -51,10 +53,12 @@ typedef struct
             findFifoQueueTask(head, del_pos, type, del_task);               \
             if (del_pos && del_pos->task == del_task)                       \
             {                                                               \
-                deleteFifoQueueTask(del_pos, type)                          \
+                list_del(&del_pos->list);                                   \
+                FREE(del_pos);                                              \
             }                                                               \
         }                                                                   \
     } while (0);
+
 
 static inline FifoQueue *createFifiQueue(void)
 {

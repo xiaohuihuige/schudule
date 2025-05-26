@@ -78,7 +78,6 @@ static int _timerEvent(TaskScheduler * scher)
             if (timer->repeat_ms <= 0) {
                 MUTEX_LOCK(&scher->myMutex);
                 deleteFifoQueueTask(task_node, TaskTimer);
-                FREE(task_node);
                 MUTEX_UNLOCK(&scher->myMutex);
             }
             else if (timer->repeat_ms > 0 && interval_time >= timer->repeat_ms) {
@@ -90,7 +89,6 @@ static int _timerEvent(TaskScheduler * scher)
         if (timer->async_del_flags) {
             MUTEX_LOCK(&scher->myMutex);
             deleteFifoQueueTask(task_node, TaskTimer);
-            FREE(task_node);
             MUTEX_UNLOCK(&scher->myMutex);
         }
     }
@@ -368,12 +366,10 @@ void destroyTaskScheduler(TaskScheduler * scher)
     if (scher->taskQueue) {
         _wakeupCond(scher);
         destroyFifoQueue(scher->taskQueue, TriggerEvent);
-        FREE(scher->taskQueue);
     }
     
     if (scher->timerQueue) {
         destroyFifoQueue(scher->timerQueue, TaskTimer);
-        FREE(scher->timerQueue);
     }
     
     if (scher->signalEvents) {
