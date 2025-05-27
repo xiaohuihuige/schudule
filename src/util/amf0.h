@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "net-common.h"
+#include <schedule/net-common.h>
 
 #define AMF_OBJECT_ITEM_VALUE(v, amf_type, amf_name, amf_value, amf_size) {v.type=amf_type; v.name=amf_name; v.value=amf_value; v.size=amf_size;}
 
@@ -17,7 +17,7 @@ enum rtmp_encoding_amf_t
 
 typedef enum 
 {
-	AMF_NUMBER = 0x00,
+	AMF_NUMBER = 0,
 	AMF_BOOLEAN,
 	AMF_STRING,
 	AMF_OBJECT,
@@ -45,6 +45,16 @@ typedef struct
 	size_t size;
 } amf_object_item;
 
+#define AMF_STRING_LENGTH(a) ((strlen(a)) + 3)
+#define AMF_DOUBLE_LENGTH 9
+#define AMF_OBJECT_LENGTH 1
+#define AMF_OBJECT_END_LENGTH 3
+#define AMF_NAMESTRING_LENGTH(a, b) (5 + (strlen(a)) + (strlen(b)))
+#define AMF_NAMEDOUBLE_LENGTH(a) (11 + (strlen(a)))
+#define AMF_NAMEBOOLEAN_LENGTH(a) (4 + (strlen(a)))
+#define AMF_NULL_LENGTH 1
+#define AMG_BOOLEAN_LENGTH 2
+
 
 int amf_write_null(bs_t *b);
 int amf_write_undefined(bs_t *b);
@@ -65,7 +75,7 @@ int amf_write_NamedBoolean(bs_t *b, const char* name, size_t length, uint8_t val
 int amf_read_null(bs_t *b, uint8_t *value);
 int amf_read_double(bs_t *b, double* value);
 int amf_read_string(bs_t *b, char *string, int size);
-int amf_read_object_item(bs_t *b, AMFDataType type, amf_object_item *item);
+int amf_read_object_item(bs_t *b, amf_object_item *item);
 int amf_read_object(bs_t *b, amf_object_item* items, size_t n);
 int amf_read_item(bs_t *b, amf_object_item *item, int size);
 

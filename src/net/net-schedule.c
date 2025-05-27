@@ -18,7 +18,7 @@ static int _triggerEvent(TaskScheduler * scher)
 
     TriggerEvent * trigger = (TriggerEvent *)task_node->task;
     if (trigger) {
-        DBG("doing function... task_id %lld, flag %d", trigger->task_id, trigger->sync_flags);
+        //DBG("doing function... task_id %lld, flag %d", trigger->task_id, trigger->sync_flags);
         if (trigger->function)
             trigger->function(trigger->args);
         
