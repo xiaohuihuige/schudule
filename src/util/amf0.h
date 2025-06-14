@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include <schedule/net-common.h>
+#include "net-common.h"
 
 #define AMF_OBJECT_ITEM_VALUE(v, amf_type, amf_name, amf_value, amf_size) {v.type=amf_type; v.name=amf_name; v.value=amf_value; v.size=amf_size;}
 
