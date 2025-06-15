@@ -1,3 +1,8 @@
+CC := gcc
+AR := ar
+#CC :=arm-linux-gnueabihf-gcc
+#AR :=arm-linux-gnueabihf-ar
+
 CURRENT_DIR = $(shell pwd)
 OUT_DIR     = $(CURRENT_DIR)/out
 OBJ_DIR     = $(OUT_DIR)/obj
@@ -43,7 +48,7 @@ $(BIN_DIR)/%: example/%.c | TEMP_PATH
 	$(CC) -o $@ $^ $(OBJ_FILE) $(CFLAGS)
 
 subdir:
-	$(MAKE) -C $(SRC_DIR) CFLAGS="$(CFLAGS)" OBJ_DIR=$(OBJ_DIR) IPCS_DIR=$(IPCS_DIR) NET_DIR=$(NET_DIR) STATIC_NAME=$(STATIC_NAME) UTIL_DIR=$(UTIL_DIR) DYNAMIC_NAME=$(DYNAMIC_NAME) 
+	$(MAKE) -C $(SRC_DIR) CFLAGS="$(CFLAGS)" OBJ_DIR=$(OBJ_DIR) IPCS_DIR=$(IPCS_DIR) NET_DIR=$(NET_DIR) STATIC_NAME=$(STATIC_NAME) UTIL_DIR=$(UTIL_DIR) DYNAMIC_NAME=$(DYNAMIC_NAME) CC=$(CC) AR=$(AR) 
 	find $(SRC_DIR) -name "*.h" -exec cp {} $(INCLUDE_DIR) \;
 
 clean:
