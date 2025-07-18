@@ -38,7 +38,7 @@ extern "C" {
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
-
+#include <stdatomic.h>
 #include "log.h"
 #include "bitstream.h"
 #include "kernel_list.h"

@@ -5,6 +5,7 @@
 
 typedef struct
 {
+	atomic_int counter;
     uint8_t frame_type;       // 帧类型
     uint32_t timestamp;       // 时间戳
     uint32_t index;
@@ -25,8 +26,29 @@ static inline Buffer *createBuffer(size_t size)
 
 	buffer->timestamp  = 0;
 	buffer->frame_type = 0;
+	buffer->counter    = 0;
 
 	return buffer;
+}
+
+static inline void bufferReferenceCount(Buffer *buffer)
+{
+	if (!buffer)
+		return;
+	
+	atomic_fetch_add(&buffer->counter, 1); // 原子加1
+}
+
+
+static inline void bufferReleaseSpace(Buffer *buffer)
+{
+	if (!buffer)
+		return;
+
+	atomic_fetch_sub(&buffer->counter, 1);
+
+    if (0 == atomic_load(&buffer->counter))
+		FREE(buffer);
 }
 
 static inline Buffer *createFrameBuffer(uint8_t *frame, size_t frame_len, uint8_t frame_type, uint32_t timestamp)
