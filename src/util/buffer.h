@@ -123,4 +123,23 @@ static inline void writeBufferU(Buffer *buffer, int index, int pos, int n, uint3
 }
 
 
+Buffer* reinitializeBuffer(Buffer* buffer, const uint8_t* new_data, uint32_t new_length) {
+	if (!buffer || !new_data)
+		return NULL;
+
+    uint32_t total_length = buffer->length + new_length;
+
+    // 重新分配内存以适应新的数据长度
+    Buffer* new_buffer = (Buffer*)realloc(buffer, sizeof(Buffer) + total_length * sizeof(uint8_t));
+    if (!new_buffer) 
+        return NULL; // 内存分配失败
+
+    // 复制原有数据到新位置
+    memcpy(buffer->data + buffer->length, new_data, new_length);
+
+    buffer->length = total_length; // 更新长度
+
+    return new_buffer; // 成功
+}
+
 #endif
